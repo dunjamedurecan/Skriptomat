@@ -1,0 +1,2 @@
+# .gitignore file se koristi za popis fileova koji se ne prate pomoću gita
+untracked_note.txt
