@@ -9,9 +9,8 @@
 
 ## Tech stack
 - Backend: Python, Django, Django REST Framework
-- Frontend: React (Vite or CRA)
+- Frontend: React Vite
 - Database: PostgreSQL (pgAdmin4 for management)
-- Dev tooling: Docker Compose (recommended), pre-commit hooks, GitHub Actions for CI
 
 ## Prerequisites
 - Git
@@ -22,16 +21,44 @@
 - Recommended: VS Code
 
 ## Quickstart (developer setup)
-1. Clone repository:
-   git clone <repo-url>
+1. Clone the repository:
+   git clone https://github.com/your-username/skriptomat.git
    cd skriptomat
-... fill in process here
+
+2. Backend setup:
+   - Create and activate a virtual environment:
+     python -m venv .venv
+     .\.venv\Scripts\Activate
+   - Install dependencies:
+     pip install -r backend/requirements.txt
+   - Copy .env.example to .env and fill in your database credentials
+   - Run migrations:
+     cd backend
+     python manage.py migrate
+   - Start the server:
+     python manage.py runserver
+
+3. Frontend setup:
+   - cd frontend
+   - npm install
+   - Copy .env.example to .env
+   - npm run dev
+
+4. When creating new features:
+   - Create a new branch:
+     git checkout -b feature/your-feature-name
+   - Make changes and commit regularly
+   - Push to GitHub and create a pull request   
 
 ## Database setup (developer)
-... fill in process here
+1. Install PostgreSQL and pgAdmin4
+2. Create a new database called "Skriptomat"
+3. Create a user with permission to access this database (default: postgres)
+4. Copy credentials to personal, local .env file
+
+
 
 ## Migrations and fixtures
-
 
 ## Testing
 
