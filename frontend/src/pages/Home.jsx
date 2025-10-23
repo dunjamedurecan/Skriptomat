@@ -6,6 +6,8 @@ export default function Home() {
         <header>
             <h1>Skriptomat</h1>
             <nav className="navbar">
+                <Link to="/">Prijava</Link>
+                <Link to="/">Registracija</Link>
                 <Link to="/about">O nama</Link>
             </nav>
         </header>
