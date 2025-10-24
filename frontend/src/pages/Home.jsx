@@ -9,6 +9,7 @@ export default function Home() {
                 <Link to="/">Prijava</Link>
                 <Link to="/">Registracija</Link>
                 <Link to="/about">O nama</Link>
+                <Link to="/feed">Feed</Link>
             </nav>
         </header>
         <main>
