@@ -1,58 +1,60 @@
-body {
-    margin: 0;
-    padding: 0;
-    background-color: transparent;
+/* Global styles - use :global() */
+:global(body) {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
 }
 
-.login-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    width: 100vw;
-    background: #0f0f23;
-    background-image: 
-        radial-gradient(at 20% 30%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-        radial-gradient(at 80% 70%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
-        radial-gradient(at 50% 50%, rgba(0, 255, 72, 0.1) 0px, transparent 50%);
-    position: fixed;
-    top: 0;
-    left: 0;
+/* Scoped classes - use camelCase in JSX */
+.loginContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #0f0f23;
+  background-image: 
+    radial-gradient(at 20% 30%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+    radial-gradient(at 80% 70%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(0, 255, 72, 0.1) 0px, transparent 50%);
 }
 
-.login-container h1 {
-    background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
-    margin-bottom: 0.5rem;
-    font-size: 2.5rem;
-    font-weight: bold;
-    padding-bottom: 2rem;
+/* Nested element selector - works automatically */
+.loginContainer h1 {
+  font-size: 2.5rem;
+  color: #6366f1;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-align: center;
 }
 
-
-
-.login-box {
-    position: relative;
-    overflow: hidden;
-    background: rgba(23, 23, 37, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 2rem 3.5rem 1rem 3.5rem;
-    border-radius: 20px;
-    box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.5),
-        0 0 100px rgba(99, 102, 241, 0.1);
-    width: 100%;
-    max-width: 480px;
-    min-width: 420px;
-    transition: all 0.5s ease;
+.loginBox {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 20px;
+  padding: 3rem;
+  min-width: 420px;
+  max-width: 480px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
-.login-box::before {
+/* Pseudo-elements work normally within scoped class */
+.loginBox::before {
   content: '';
   position: absolute;
   top: -50%;
@@ -70,163 +72,161 @@ body {
   opacity: 0;
 }
 
-
-.login-box:hover {
+.loginBox:hover {
   transform: scale(1.05);
-  box-shadow:
+  box-shadow: 
     0 20px 60px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(0, 255, 255, 0.5);
+    0 0 20px rgba(0,255,255,0.5);
 }
 
-.login-box:hover::before {
+.loginBox:hover::before {
   opacity: 1;
   transform: rotate(-45deg) translateY(100%);
 }
 
-
-.login-box h2 {
-    color: #e2e8f0;
-    text-align: center;
-    margin-bottom: 2.5rem;
-    font-size: 1.75rem;
-    font-weight: 500;
+.loginBox h2 {
+  font-size: 1.75rem;
+  margin-bottom: 2rem;
+  color: #f3f4f6;
+  text-align: center;
+  font-weight: 600;
 }
 
-.login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.form-group label {
-    color: #cbd5e1;
-    font-weight: 500;
-    font-size: 1rem;
+.formGroup label {
+  color: #d1d5db;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
-.form-group input {
-    padding: 0.95rem 1.1rem;
-    border: 1.5px solid rgba(255, 255, 255, 0.1);
-    background: rgba(15, 15, 35, 0.6);
-    color: #e2e8f0;
-    border-radius: 10px;
-    font-size: 1.05rem;
-    transition: all 0.3s ease;
+.formGroup input {
+  padding: 0.95rem;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 10px;
+  background: rgba(31, 41, 55, 0.5);
+  color: #f3f4f6;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-.form-group input::placeholder {
-    color: #64748b;
+.formGroup input::placeholder {
+  color: rgba(156, 163, 175, 0.6);
 }
 
-.form-group input:focus {
-    outline: none;
-    border-color: #818cf8;
-    background: rgba(15, 15, 35, 0.8);
-    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+.formGroup input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: rgba(31, 41, 55, 0.8);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.95rem;
+.formOptions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
 }
 
-
-
-.remember-me {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    color: #94a3b8;
+.rememberMe {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d1d5db;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 
-.remember-me input[type='checkbox'] {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-    accent-color: #818cf8;
+.rememberMe input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #6366f1;
 }
 
-.forgot-password {
-    color: #818cf8;
-    text-decoration: none;
-    font-weight: 500;
+.forgotPassword {
+  color: #6366f1;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
-.forgot-password:hover {
-    color: #a5b4fc;
-    text-decoration: underline;
+.forgotPassword:hover {
+  color: #818cf8;
+  text-decoration: underline;
 }
 
-.login-button {
-    padding: 1rem;
-    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 0.75rem;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+.error {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin: -0.5rem 0 0 0;
+  text-align: center;
 }
 
-.login-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
+.loginButton {
+  padding: 1rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 1rem;
 }
 
-.login-button:hover::before {
-    left: 100%;
+.loginButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
 }
 
-.login-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        0 10px 30px rgba(99, 102, 241, 0.4),
-        0 0 40px rgba(168, 85, 247, 0.3);
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
 }
 
-.login-button:active {
-    transform: translateY(0);
+.loginButton:hover::before {
+  left: 100%;
 }
 
-.register-link {
-    text-align: center;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+.loginButton:active {
+  transform: translateY(0);
 }
 
-.register-link p {
-    color: #94a3b8;
-    font-size: 1rem;
+.registerLink {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.95rem;
 }
 
-.register-link a {
-    color: #818cf8;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
+.registerLink a {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-.register-link a:hover {
-    color: #a5b4fc;
-    text-decoration: underline;
+.registerLink a:hover {
+  color: #818cf8;
+  text-decoration: underline;
 }
