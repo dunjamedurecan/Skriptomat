@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router-dom";
+import '../styles/login.css'
 
 export default function Login(){
     const [email, setEmail]=useState('');
@@ -24,17 +25,37 @@ export default function Login(){
 
     return(
         <div className="login-container">
-            <div className='login-card'>
-            <h2>Prijava</h2>
-            <form onSubmit={handleSubmit} className="login-form">
-            <label>
-                Email
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ime@primjer.com" required/>
-            </label>
-            {error && <div className="error">{error}</div>}
-            <button type="submit">Prijavi se</button>
-            <p>Nemaš račun,<Link to="/registration">registriraj se</Link> </p>
-            </form>
+            <h1>Skriptomat</h1>
+            <div className='login-box'>
+                
+                <form onSubmit={handleSubmit} className="login-form">
+
+                    <div className='form-group'>
+                        <label>Email or Username</label>
+                        <input type='email' placeholder='example@fer.hr'></input>
+                    </div>
+
+                    <div className='form-group'>
+                        <label>Lozinka</label>
+                        <input type='password' placeholder='••••••••'></input>
+                    </div>
+
+                    <div className='form-options'>
+                        <label className='remember-me'>
+                            <input type='checkbox' />
+                            <span>Zapamti me</span>
+                        </label>
+                        <a href='#' className='forgot-password'>Zaboravljena lozinka?</a>
+                    </div>
+
+                    <button type='submit' className='login-button'>Prijavi se</button>
+
+                </form>
+
+                <div className='register-link'>
+                    <p>Nemaš račun? <a href='#' Registriraj se></a></p>
+                </div>
+
             </div>
         </div>
     );
