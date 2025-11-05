@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import styles from '../styles/Feed.module.css'
-import commonStyles from '../styles/Home.module.css'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import styles from '../styles/Feed.module.css';
+import commonStyles from '../styles/Home.module.css';
 
 export default function Feed() {
   const [posts, setPosts] = useState([])

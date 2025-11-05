@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router-dom";
-import styles from '../styles/Login.module.css'
-import regStyles from '../styles/Registration.module.css'
+import styles from '../styles/Login.module.css';
+import regStyles from '../styles/Registration.module.css';
 
 export default function Registration(){
     const [email, setEmail]=useState('');
