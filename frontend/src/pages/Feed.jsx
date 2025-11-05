@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/feed.css'
 
@@ -7,17 +7,65 @@ export default function Feed() {
   const [newPost, setNewPost] = useState('')
   const [showModal, setShowModal] = useState(false)
 
-  const handleAddPost = (e) => {
-    e.preventDefault()
-    if (newPost.trim() === '') return
-    const post = {
-      id: Date.now(),
-      content: newPost.trim(),
-      date: new Date().toLocaleString()
+  //PDF-upload
+  const[file,setFile]=useState(null)
+  const [uploading,setUploading]=useState(false)
+  const fileInputRef=useRef(null)
+
+  const API_BASE='http://localhost:8000/api'
+
+  useEffect(()=>{
+    fetchPosts()
+  },[])
+  const fetchPosts=async()=>{
+    try{
+      const res=await fetch(`${API_BASE}/posts/`)
+      if(!res.ok)throw new Error('Ne mogu dohvatiti objave')
+      const data=await res.json()
+      setPosts(data)
+    }catch(err){
+      console.error('fetchPosts error',err)
     }
-    setPosts([post, ...posts])
-    setNewPost('')
-    setShowModal(false)
+  }
+  const handleFileChange=(e)=>{
+    const f=e.target.files[0]
+    setFile(f||null)
+  }
+  const handleAddPost = async(e) => {
+    e.preventDefault()
+    if (newPost.trim() === ''&&!file){
+      return alert('Unesi sadržaj objave ili priloži PDF.')
+    }
+
+    const formData=new FormData()
+    formData.append('content',newPost)
+    if(file){
+      formData.append('file',file)
+    }else{
+      return alert('Priloži pdf datoteku')
+    }
+    try{
+      setUploading(true)
+      const res=await fetch(`${API_BASE}/posts/`,{
+        method:'POST',
+        body:formData
+      })
+      if(!res.ok){
+        const err=await res.json().catch(()=>null)
+        console.error('Upload/Save post error',err)
+        return
+      }
+      const savedPost=await res.json()
+      setPosts(prev=>[savedPost,...prev])
+      setNewPost('')
+      setFile(null)
+      if(fileInputRef.current)fileInputRef.current.value=''
+      setShowModal(false)
+    }catch(err){
+      console.error('handlaAddPost error',err)
+    }finally{
+      setUploading(false)
+    }
   }
 
   return (
@@ -44,9 +92,21 @@ export default function Feed() {
                     onChange={(e) => setNewPost(e.target.value)}
                     placeholder="Unesi sadržaj objave..."
                   ></textarea>
-                  <button type="submit">Objavi</button>
+                  <hr/>
+                  <h4>Priloži PDF</h4>
+                  <input ref={fileInputRef} type="file" accept="application/pdf" onChange={handleFileChange}/>
+                  {file && (
+                    <div className="attached-file">
+                      <small>Priloženo: {file.name} ({Math.round(file.size/1024)}KB)</small>
+                    </div>
+                  )}
+                  <div className='form-actions'>
+                    <button type="submit" disabled={uploading}>
+                      {uploading ? 'Spremanje...':'Objavi'}
+                    </button>
+                    <button type="button" className='close-modal-btn' onClick={()=>setShowModal(false)}>Zatvori</button>
+                  </div>
                 </form>
-                <button className="close-modal-btn" onClick={() => setShowModal(false)}>Zatvori</button>
               </div>
             </div>
           )}
@@ -59,6 +119,18 @@ export default function Feed() {
                 <div key={post.id} className="post-item">
                   <p>{post.content}</p>
                   <span className="post-date">{post.date}</span>
+
+                  {post.file &&(
+                    <div className='post-file'>
+                      <span>{post.file.filename}({Math.round((post.file.size||0)/1024)}KB</span>
+                      {post.file.download_url ? (
+                        <button onClick={()=>handleDownload(post.file.download_url,post.file.filename)}>Preuzmi</button>
+
+                      ):(
+                        <button onClick={()=>handleDownload(`${API_BASE}/posts/${post.id}/download/`,post.file.filename)}>Preuzmi</button>
+                      )}
+                      </div>
+                  )}
                 </div>
               ))
             )}
