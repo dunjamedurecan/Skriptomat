@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from 'react-router-dom';
+import styles from '../styles/Login.module.css';
 
 export default function Login(){
     const [email, setEmail]=useState('');
@@ -22,19 +22,46 @@ export default function Login(){
         navigate('/feed');
     }
 
-    return(
-        <div className="login-container">
-            <div className='login-card'>
-            <h2>Prijava</h2>
-            <form onSubmit={handleSubmit} className="login-form">
-            <label>
-                Email
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ime@primjer.com" required/>
-            </label>
-            {error && <div className="error">{error}</div>}
-            <button type="submit">Prijavi se</button>
-            <p>Nemaš račun,<Link to="/registration">registriraj se</Link> </p>
-            </form>
+    return (
+        <div className={styles.loginContainer}>
+            <h1>Skriptomat</h1>
+            <div className={styles.loginBox}>
+                <form onSubmit={handleSubmit} className={styles.loginForm}>
+                    <div className={styles.formGroup}>
+                        <label>Email or Username</label>
+                        <input 
+                            type='email' 
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder='example@fer.hr'
+                        />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label>Lozinka</label>
+                        <input type='password' placeholder='••••••••' />
+                    </div>
+
+                    <div className={styles.formOptions}>
+                        <label className={styles.rememberMe}>
+                            <input type='checkbox' />
+                            <span>Zapamti me</span>
+                        </label>
+                        <a href='#' className={styles.forgotPassword}>
+                            Zaboravljena lozinka?
+                        </a>
+                    </div>
+
+                    {error && <p className={styles.error}>{error}</p>}
+
+                    <button type='submit' className={styles.loginButton}>
+                        Prijavi se
+                    </button>
+                </form>
+
+                <div className={styles.registerLink}>
+                    <p>Nemaš račun? <Link to="/registration">Registriraj se</Link></p>
+                </div>
             </div>
         </div>
     );

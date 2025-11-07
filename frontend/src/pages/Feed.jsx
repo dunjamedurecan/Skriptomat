@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import '../styles/feed.css'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import styles from '../styles/Feed.module.css';
+import commonStyles from '../styles/Home.module.css';
 
 export default function Feed() {
   const [posts, setPosts] = useState([])
@@ -21,24 +22,24 @@ export default function Feed() {
   }
 
   return (
-    <div className="container">
+    <div className={commonStyles.container}>
       <header>
         <h1>Skriptomat</h1>
-        <nav className="navbar">
+        <nav className={commonStyles.navbar}>
           <Link to="/">Profil</Link>
           <Link to="/">Odjava</Link>
         </nav>
       </header>
 
-      <main className="feed-main">
-        <div className="feed-card">
-          <button className="open-modal-btn" onClick={() => setShowModal(true)}>Nova objava</button>
+      <main className={styles.feedMain}>
+        <div className={styles.feedCard}>
+          <button className={styles.openModalBtn} onClick={() => setShowModal(true)}>Nova objava</button>
 
           {showModal && (
-            <div className="modal-overlay" onClick={() => setShowModal(false)}>
-              <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+              <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <h3>Napiši novu objavu</h3>
-                <form className="new-post-form" onSubmit={handleAddPost}>
+                <form className={styles.newPostForm} onSubmit={handleAddPost}>
                   <textarea
                     value={newPost}
                     onChange={(e) => setNewPost(e.target.value)}
@@ -46,19 +47,19 @@ export default function Feed() {
                   ></textarea>
                   <button type="submit">Objavi</button>
                 </form>
-                <button className="close-modal-btn" onClick={() => setShowModal(false)}>Zatvori</button>
+                <button className={styles.closeModalBtn} onClick={() => setShowModal(false)}>Zatvori</button>
               </div>
             </div>
           )}
 
-          <div className="posts-list">
+          <div className={styles.postsList}>
             {posts.length === 0 ? (
-              <p className="no-posts">Još nema objava.</p>
+              <p className={styles.noPosts}>Još nema objava.</p>
             ) : (
               posts.map((post) => (
-                <div key={post.id} className="post-item">
+                <div key={post.id} className={styles.postItem}>
                   <p>{post.content}</p>
-                  <span className="post-date">{post.date}</span>
+                  <span className={styles.postDate}>{post.date}</span>
                 </div>
               ))
             )}
