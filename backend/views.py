@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Document
-from .serializers import DocumentSerializer
+from backend.models import Document
+from backend.serializers import DocumentSerializer
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset=Document.objects.all().order_by("-uploaded_at")

@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path,include
-from .views import DocumentViewSet
+from backend.views import DocumentViewSet
 
 router=DefaultRouter()
 router.register(r"documents",DocumentViewSet,basename="document")
