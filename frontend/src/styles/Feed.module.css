@@ -1,12 +1,12 @@
 /* dodatni stilovi */
-.feed-main {
+.feedMain {
   margin-top: 140px;
   display: flex;
   justify-content: center;
   width: 100%;
 }
 
-.feed-card {
+.feedCard {
   background: #fff;
   padding: 2rem;
   border-radius: 16px;
@@ -16,7 +16,7 @@
   position: relative;
 }
 
-.open-modal-btn {
+.openModalBtn {
   background-color: #2563eb;
   color: #fff;
   font-size: 1rem;
@@ -27,11 +27,11 @@
   margin-bottom: 1rem;
 }
 
-.open-modal-btn:hover {
+.openModalBtn:hover {
   background-color: #1e40af;
 }
 
-.modal-overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -54,7 +54,7 @@
   position: relative;
 }
 
-.close-modal-btn {
+.closeModalBtn {
   margin-top: 1rem;
   background-color: #dc2626;
   color: #fff;
@@ -63,18 +63,18 @@
   cursor: pointer;
 }
 
-.close-modal-btn:hover {
+.closeModalBtn:hover {
   background-color: #b91c1c;
 }
 
-.new-post-form {
+.newPostForm {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.new-post-form textarea {
+.newPostForm textarea {
   resize: none;
   min-height: 100px;
   padding: 1rem;
@@ -84,13 +84,13 @@
   font-family: inherit;
 }
 
-.new-post-form textarea:focus {
+.newPostForm textarea:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.new-post-form button {
+.newPostForm button {
   background-color: #2563eb;
   color: #fff;
   font-size: 1rem;
@@ -100,33 +100,33 @@
   cursor: pointer;
 }
 
-.new-post-form button:hover {
+.newPostForm button:hover {
   background-color: #1e40af;
 }
 
-.posts-list {
+.postsList {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.post-item {
+.postItem {
   background: #f8fafc;
   padding: 1rem;
   border-radius: 10px;
   box-shadow: var(--box-shadow);
 }
 
-.post-item p {
+.postItem p {
   margin: 0 0 0.5rem 0;
 }
 
-.post-date {
+.postDate {
   font-size: 0.8rem;
   color: #6b7280;
 }
 
-.no-posts {
+.noPosts {
   text-align: center;
   color: #6b7280;
   font-size: 1rem;
