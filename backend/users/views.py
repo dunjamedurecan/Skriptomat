@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import UserRegistrationSerializer, UserSerializer
 
+from rest_framework.views import APIView
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from oauth2_provider.settings import oauth2_settings
 from oauthlib.common import generate_token
@@ -47,7 +48,7 @@ class RegisterView(generics.CreateAPIView):
         )
 
 
-class LoginView(generics.GenericAPIView):
+class LoginView(APIView):
 
     permission_classes = [AllowAny]
 
@@ -113,4 +114,91 @@ class LoginView(generics.GenericAPIView):
                 'expires_in': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
                 'token_type': 'Bearer',
                 'user': user_data
+            }, status=status.HTTP_200_OK)
+    
+
+
+class TokenRefreshView(APIView):
+    """
+    API endpoint to refresh access token using refresh token.
+    POST /api/users/token/refresh/
+    
+    Accepts: refresh_token
+    Returns: new access_token, new refresh_token
+    """
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        """Handle POST request to refresh access token"""
+        refresh_token_string = request.data.get('refresh_token')
+        
+        if not refresh_token_string:
+            return Response(
+                {"error": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Get refresh token from database
+            refresh_token = RefreshToken.objects.get(token=refresh_token_string)
+        except RefreshToken.DoesNotExist:
+            return Response(
+                {"error": "Invalid refresh token."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Check if refresh token is still valid (not revoked)
+        if refresh_token.revoked:
+            return Response(
+                {"error": "Refresh token has been revoked."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Get the user and application
+        user = refresh_token.user
+        application = refresh_token.application
+        
+        # Revoke old access token
+        old_access_token = refresh_token.access_token
+        old_access_token.delete()
+        
+        # Create new access token
+        expires = now() + timedelta(seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS)
+        new_access_token = AccessToken.objects.create(
+            user=user,
+            application=application,
+            token=generate_token(),
+            expires=expires,
+            scope='read write'
+        )
+        
+        # If ROTATE_REFRESH_TOKEN is True, create new refresh token
+        if oauth2_settings.ROTATE_REFRESH_TOKEN:
+            # Revoke old refresh token
+            refresh_token.revoke()
+            
+            # Create new refresh token
+            new_refresh_token = RefreshToken.objects.create(
+                user=user,
+                application=application,
+                token=generate_token(),
+                access_token=new_access_token
+            )
+            
+            return Response({
+                'access_token': new_access_token.token,
+                'refresh_token': new_refresh_token.token,
+                'expires_in': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+                'token_type': 'Bearer',
+            }, status=status.HTTP_200_OK)
+        else:
+            # Reuse same refresh token, update its access_token reference
+            refresh_token.access_token = new_access_token
+            refresh_token.save()
+            
+            return Response({
+                'access_token': new_access_token.token,
+                'refresh_token': refresh_token_string,
+                'expires_in': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+                'token_type': 'Bearer',
             }, status=status.HTTP_200_OK)
