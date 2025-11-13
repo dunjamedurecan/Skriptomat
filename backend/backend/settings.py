@@ -163,3 +163,12 @@ AUTHENTICATION_BACKENDS = [
     'users.backends.EmailOrUsernameBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+# OAuth2 settings
+OAUTH2_PROVIDER = {
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 3600, # 1 hr
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 86400, # 24 hrs
+    'ROTATE_REFRESH_TOKEN': True,
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
+    
+}
