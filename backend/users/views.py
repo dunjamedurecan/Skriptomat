@@ -3,6 +3,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import UserRegistrationSerializer, UserSerializer
 
+from oauth2_provider.models import Application, AccessToken, RefreshToken
+from oauth2_provider.settings import oauth2_settings
+from oauthlib.common import generate_token
+from django.utils.timezone import now, timedelta
+from django.contrib.auth import authenticate
+
 
 class RegisterView(generics.CreateAPIView):
     """
@@ -39,3 +45,72 @@ class RegisterView(generics.CreateAPIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class LoginView(generics.GenericAPIView):
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+            """Handle POST request to login user"""
+            username = request.data.get('username')  # Can be email or username
+            password = request.data.get('password')
+            
+            if not username or not password:
+                return Response(
+                    {"error": "Username and password are required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Authenticate user (uses your custom EmailOrUsernameBackend)
+            user = authenticate(username=username, password=password)
+            
+            if user is None:
+                return Response(
+                    {"error": "Invalid credentials."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            
+            if not user.is_active:
+                return Response(
+                    {"error": "Account is disabled."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Get OAuth2 application (the one we'll create in admin)
+            try:
+                application = Application.objects.get(name="Skriptomat Frontend")
+            except Application.DoesNotExist:
+                return Response(
+                    {"error": "OAuth2 application not configured."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Create access token
+            expires = now() + timedelta(seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS)
+            access_token = AccessToken.objects.create(
+                user=user,
+                application=application,
+                token=generate_token(),
+                expires=expires,
+                scope='read write'
+            )
+            
+            # Create refresh token
+            refresh_token = RefreshToken.objects.create(
+                user=user,
+                application=application,
+                token=generate_token(),
+                access_token=access_token
+            )
+            
+            # Return tokens and user data
+            user_data = UserSerializer(user).data
+            
+            return Response({
+                'access_token': access_token.token,
+                'refresh_token': refresh_token.token,
+                'expires_in': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+                'token_type': 'Bearer',
+                'user': user_data
+            }, status=status.HTTP_200_OK)
