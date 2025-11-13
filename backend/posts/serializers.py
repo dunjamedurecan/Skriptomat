@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from backend.models import Document
+from posts.models import Document
 
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
