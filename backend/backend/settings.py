@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "oauth2_provider",
     "corsheaders",
     "posts",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -153,3 +154,12 @@ REST_FRAMEWORK = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
+
+# Authentication backends (for username/email login variability)
+AUTHENTICATION_BACKENDS = [
+    'users.backends.EmailOrUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
