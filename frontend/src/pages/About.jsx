@@ -12,6 +12,14 @@ export default function About() {
                 <Link to="/registration">Registracija</Link>
             </nav>
         </header>
+        <main>
+            <section className={styles.banner}>
+                <div className={styles.content}>
+                     <h1>Skriptomat</h1>
+                     <p>Platforma za dijeljenje studentskih materijala.</p>
+                </div>
+            </section>
+        </main>
     </div>
   );
 }

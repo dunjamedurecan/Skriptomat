@@ -33,15 +33,14 @@ export default function Feed() {
       setPosts(data);
     } catch (err) {
       console.error('fetchPosts error', err);
+      
+      if (err.response?.status === 401){
+        setMessage('Sesija istekla. Molimo prijavite se ponovno.');
+        logout();
+      } else {
+        setMessage('Greška pri dohvaćanju objava.');
+      }
     }
-    
-    if (err.response?.status === 401){
-      setMessage('Sesija istekla. Molimo prijavite se ponovno.');
-      logout();
-    } else {
-      setMessage('Greška pri dohvaćanju objava.');
-    }
-
   };
 
   function onFileChange(e) {
@@ -117,8 +116,6 @@ export default function Feed() {
       <header>
         <h1>Skriptomat</h1>
         <nav className={commonStyles.navbar}>
-          <Link to="/">Profil</Link>
-          <Link to="/">Odjava</Link>
           <button onClick={logout}>Odjavi se</button>
         </nav>
       </header>
@@ -139,9 +136,14 @@ export default function Feed() {
                   ></textarea>
 
                   <hr />
-                  <textarea value={title} onChange={(e)=>setTitle(e.target.value)}
-                  placeholder='Unesi naslov dokumenta'></textarea>
-                  <h4>Priloži PDF </h4>
+                  
+                  <textarea 
+                    value={title} 
+                    onChange={(e)=>setTitle(e.target.value)}
+                    placeholder='Unesi naslov dokumenta'
+                  ></textarea>
+                  
+                  <h4>Priloži PDF</h4>
 
                   <input
                     ref={fileInputRef}
@@ -151,22 +153,21 @@ export default function Feed() {
                   />
 
                   {file && (
-                    <div className="attached-file">
+                    <div style={{padding: '0.75rem', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '8px', color: '#d1d5db', fontSize: '0.9rem'}}>
                       <small>Priloženo: {file.name} ({Math.round(file.size / 1024)} KB)</small>
                     </div>
                   )}
 
-                  <div className="form-actions">
-                    <button type="submit" disabled={uploading}>
-                      {uploading ? 'Spremanje...' : 'Objavi'}
-                    </button>
-                    <button type="button" className="close-modal-btn" onClick={() => setShowModal(false)}>Zatvori</button>
-                  </div>
+                  <button type="submit" disabled={uploading}>
+                    {uploading ? 'Spremanje...' : 'Objavi'}
+                  </button>
+                  
+                  <button type="button" className={styles.closeModalBtn} onClick={() => setShowModal(false)}>
+                    Zatvori
+                  </button>
 
                   {message && <p className={styles.message}>{message}</p>}
                 </form>
-
-                <button className="close-modal-btn" onClick={() => setShowModal(false)}>Zatvori</button>
               </div>
             </div>
           )}
@@ -177,7 +178,6 @@ export default function Feed() {
             ) : (
               posts.map((post) => (
                 <div key={post.id} className={styles.postItem}>
-                  
                   <p>{post.title}</p>
                   <p>{post.post}</p>
                   {post.file && (
@@ -185,7 +185,7 @@ export default function Feed() {
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
                     </p>
                   )}
-                  <span className="post-date">{post.uploaded_at || post.date}</span>
+                  <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                 </div>
               ))
             )}

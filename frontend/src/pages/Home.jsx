@@ -16,7 +16,7 @@ export default function Home() {
             <section className={styles.banner}>
                 <div className={styles.content}>
                      <h1>Dobrodošli u Skriptomat</h1>
-                <p>Dijeli svoje skripte. Inspiriraj druge. Brzo i jednostavno.</p>
+                     <p>Dijeli svoje skripte. Inspiriraj druge. Brzo i jednostavno.</p>
                 </div>
             </section>
         </main>
