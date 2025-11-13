@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from 'react-router-dom';
+import { authAPI } from '../api/auth';
 import styles from '../styles/Login.module.css';
 import regStyles from '../styles/Registration.module.css';
 
@@ -97,62 +97,64 @@ export default function Registration(){
 
         <div className={styles.loginContainer}>
             <h1>Registracija</h1>
-            <div className={styles.loginBox}>
+            <div className={regStyles.registrationBox}>
                 <form onSubmit={handleSubmit} className={styles.loginForm}>
                     
-                    {/* Email */}
-                    <div className={styles.formGroup}>
-                        <label>Email</label>
-                        <input
-                            type='email'
-                            name='email'
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder='example@fer.hr'
-                            required
-                        />
+                    {/* Email and Username Row */}
+                    <div className={regStyles.inputRow}>
+                        <div className={regStyles.formGroup}>
+                            <label>Email</label>
+                            <input
+                                type='email'
+                                name='email'
+                                value={formData.email}
+                                onChange={handleChange}
+                                placeholder='example@fer.hr'
+                                required
+                            />
+                        </div>
+
+                        <div className={regStyles.formGroup}>
+                            <label>Korisničko ime</label>
+                            <input
+                                type='text'
+                                name='username'
+                                value={formData.username}
+                                onChange={handleChange}
+                                placeholder='korisnik123'
+                                required
+                            />
+                        </div>
                     </div>
 
-                    {/* Username */}
-                    <div className={styles.formGroup}>
-                        <label>Korisničko ime</label>
-                        <input
-                            type='text'
-                            name='username'
-                            value={formData.username}
-                            onChange={handleChange}
-                            placeholder='korisnik123'
-                            required
-                        />
+                    {/* First Name and Last Name Row */}
+                    <div className={regStyles.inputRow}>
+                        <div className={regStyles.formGroup}>
+                            <label>Ime (opcionalno)</label>
+                            <input
+                                type='text'
+                                name='first_name'
+                                value={formData.first_name}
+                                onChange={handleChange}
+                                placeholder='Ime'
+                            />
+                        </div>
+
+                        <div className={regStyles.formGroup}>
+                            <label>Prezime (opcionalno)</label>
+                            <input
+                                type='text'
+                                name='last_name'
+                                value={formData.last_name}
+                                onChange={handleChange}
+                                placeholder='Prezime'
+                            />
+                        </div>
                     </div>
 
-                    {/* First Name (Optional) */}
-                    <div className={styles.formGroup}>
-                        <label>Ime (opcionalno)</label>
-                        <input
-                            type='text'
-                            name='first_name'
-                            value={formData.first_name}
-                            onChange={handleChange}
-                            placeholder='Ime'
-                        />
-                    </div>
-
-                    {/* Last Name (Optional) */}
-                    <div className={styles.formGroup}>
-                        <label>Prezime (opcionalno)</label>
-                        <input
-                            type='text'
-                            name='last_name'
-                            value={formData.last_name}
-                            onChange={handleChange}
-                            placeholder='Prezime'
-                        />
-                    </div>
-
-                    {/* Passwords */}
-                    <div className={regStyles.passwordInput}>
-                        <div className={styles.formGroup}>
+                    {/* Password and Confirm Password Row */}
+                    <div className={regStyles.inputRow}>
+                        <div className={regStyles.formGroup}>
                             <label>Lozinka</label>
                             <input
                                 type='password'
@@ -164,7 +166,7 @@ export default function Registration(){
                             />
                         </div>
 
-                        <div className={styles.formGroup}>
+                        <div className={regStyles.formGroup}>
                             <label>Ponovi lozinku</label>
                             <input
                                 type='password'
