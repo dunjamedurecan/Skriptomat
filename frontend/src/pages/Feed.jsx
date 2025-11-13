@@ -2,9 +2,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/AuthContext';
+import { documentsAPI } from '../api/auth';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+//const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Feed() {
 
@@ -28,21 +29,20 @@ export default function Feed() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/posts/documents/`, { credentials: 'include' });
-      if (!res.ok) throw new Error('Ne mogu dohvatiti objave');
-      const data = await res.json();
+      const data = await documentsAPI.getAll();
       setPosts(data);
     } catch (err) {
       console.error('fetchPosts error', err);
+    }
+    
+    if (err.response?.status === 401){
+      setMessage('Sesija istekla. Molimo prijavite se ponovno.');
+      logout();
+    } else {
       setMessage('Greška pri dohvaćanju objava.');
     }
-  };
 
-  // helper za CSRF cookie (ako koristiš Django session auth)
-  function getCookie(name) {
-    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-    return match ? match.pop() : '';
-  }
+  };
 
   function onFileChange(e) {
     const f = e.target.files[0];
@@ -70,7 +70,6 @@ export default function Feed() {
   const handleAddPost = async (e) => {
     e.preventDefault();
 
-    // zahtjevamo bar tekst ili fajl
     if (newPost.trim() === '' && !file) {
       return alert('Unesi sadržaj objave ili priloži PDF.');
     }
@@ -83,33 +82,31 @@ export default function Feed() {
     try {
       setUploading(true);
       setMessage('');
-      const csrfToken = getCookie('csrftoken'); // Django CSRF cookie
 
-      const res = await fetch(`${API_BASE}/api/posts/documents/`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include', // važno za cookie-based auth / CSRF
-        headers: csrfToken ? { 'X-CSRFToken': csrfToken } : {},
-      });
-
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => null);
-        console.error('Upload/Save post error', errBody || res.statusText);
-        setMessage(errBody?.detail || 'Greška pri spremanju objave.');
-        return;
-      }
-
-      const savedPost = await res.json();
+      // Use documentsAPI instead of fetch
+      const savedPost = await documentsAPI.upload(formData);
+      
+      // Success - update posts list
       setPosts((prev) => [savedPost, ...prev]);
       setNewPost('');
       setTitle('');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setShowModal(false);
-      setMessage('Objava je uspješno spremljena.');
+      setMessage('Objava uspješno dodana!');
+      
     } catch (err) {
       console.error('handleAddPost error', err);
-      setMessage('Greška pri slanju objave.');
+      
+      // Handle errors
+      if (err.response?.status === 401) {
+        setMessage('Sesija istekla. Molimo prijavite se ponovno.');
+        logout();
+      } else if (err.response?.data?.detail) {
+        setMessage(err.response.data.detail);
+      } else {
+        setMessage('Greška pri dodavanju objave.');
+      }
     } finally {
       setUploading(false);
     }
