@@ -2,10 +2,14 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
+import { useAuth } from '../context/AuthContext'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Feed() {
+
+  const { user, logout } = useAuth();
+
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -24,7 +28,7 @@ export default function Feed() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/documents/`, { credentials: 'include' });
+      const res = await fetch(`${API_BASE}/api/posts/documents/`, { credentials: 'include' });
       if (!res.ok) throw new Error('Ne mogu dohvatiti objave');
       const data = await res.json();
       setPosts(data);
@@ -81,7 +85,7 @@ export default function Feed() {
       setMessage('');
       const csrfToken = getCookie('csrftoken'); // Django CSRF cookie
 
-      const res = await fetch(`${API_BASE}/api/documents/`, {
+      const res = await fetch(`${API_BASE}/api/posts/documents/`, {
         method: 'POST',
         body: formData,
         credentials: 'include', // važno za cookie-based auth / CSRF
@@ -118,6 +122,7 @@ export default function Feed() {
         <nav className={commonStyles.navbar}>
           <Link to="/">Profil</Link>
           <Link to="/">Odjava</Link>
+          <button onClick={logout}>Odjavi se</button>
         </nav>
       </header>
 
