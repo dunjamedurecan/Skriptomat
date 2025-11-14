@@ -1,0 +1,88 @@
+/* Override the narrow loginBox width for registration */
+.registrationBox {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s ease;
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 20px;
+    padding: 3rem;
+    min-width: 700px;  /* Wider than login */
+    max-width: 800px;
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.registrationBox::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      0deg, 
+      transparent, 
+      transparent 30%, 
+      rgba(0,255,255,0.3)
+    );
+    transform: rotate(-45deg);
+    transition: all 0.5s ease;
+    opacity: 0;
+}
+
+.registrationBox:hover {
+    transform: scale(1.02);  /* Smaller scale for larger box */
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(0,255,255,0.5);
+}
+
+.registrationBox:hover::before {
+    opacity: 1;
+    transform: rotate(-45deg) translateY(100%);
+}
+
+/* Group inputs side by side */
+.inputRow {
+    display: flex;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.inputRow .formGroup {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Override formGroup styles for registration */
+.formGroup label {
+    color: #d1d5db;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.formGroup input {
+    padding: 0.95rem;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 10px;
+    background: rgba(31, 41, 55, 0.5);
+    color: #f3f4f6;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.formGroup input::placeholder {
+    color: rgba(156, 163, 175, 0.6);
+}
+
+.formGroup input:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(31, 41, 55, 0.8);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}

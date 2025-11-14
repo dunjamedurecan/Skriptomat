@@ -1,0 +1,259 @@
+/* Dark theme matching Login/Registration */
+.feedMain {
+  padding-top: 140px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.feedCard {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 700px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.openModalBtn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.openModalBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.openModalBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+.openModalBtn:hover::before {
+  left: 100%;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  color: #f3f4f6;
+}
+
+.modal h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: #f3f4f6;
+  text-align: center;
+}
+
+.modal h4 {
+  font-size: 1.1rem;
+  color: #d1d5db;
+  margin: 1rem 0 0.5rem;
+}
+
+.closeModalBtn {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(31, 41, 55, 0.5);
+  color: #f3f4f6;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.closeModalBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.newPostForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.newPostForm textarea {
+  resize: vertical;
+  min-height: 120px;
+  padding: 1rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(31, 41, 55, 0.5);
+  color: #f3f4f6;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.newPostForm textarea::placeholder {
+  color: rgba(156, 163, 175, 0.6);
+}
+
+.newPostForm textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: rgba(31, 41, 55, 0.8);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.newPostForm hr {
+  border: none;
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
+  margin: 0.5rem 0;
+}
+
+.newPostForm input[type="file"] {
+  padding: 1rem;
+  border: 1px dashed rgba(99, 102, 241, 0.4);
+  border-radius: 12px;
+  background: rgba(31, 41, 55, 0.3);
+  color: #d1d5db;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.newPostForm input[type="file"]:hover {
+  border-color: #6366f1;
+  background: rgba(31, 41, 55, 0.5);
+}
+
+.newPostForm button {
+  padding: 1rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.newPostForm button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+.newPostForm button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.postsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.postItem {
+  background: rgba(31, 41, 55, 0.5);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 16px;
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+}
+
+.postItem:hover {
+  transform: translateY(-3px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+}
+
+.postItem p {
+  margin: 0 0 0.75rem 0;
+  color: #d1d5db;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.postItem p:first-child {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: #f3f4f6;
+  margin-bottom: 0.5rem;
+}
+
+.postItem a {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.postItem a:hover {
+  color: #818cf8;
+  text-decoration: underline;
+}
+
+.postDate {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.noPosts {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 1.1rem;
+  padding: 3rem 1rem;
+}
+
+.message {
+  padding: 0.75rem;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  color: #a5b4fc;
+  text-align: center;
+  margin-top: 1rem;
+}

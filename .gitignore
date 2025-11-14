@@ -62,4 +62,5 @@ docker-compose.override.yml
 *.tmp
 *.bak
 *.dump
-untracked_note.txt
+test.jsx
+test.css
