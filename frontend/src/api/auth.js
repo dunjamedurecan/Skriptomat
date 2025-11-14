@@ -21,6 +21,10 @@ export const authAPI = {
     });
     return response.data;
   },
+  google: async ({ id_token }) => {
+    const response = await apiClient.post('/users/google/', { id_token });
+    return response.data;
+  },
 };
 
 // Document API functions
@@ -41,3 +45,5 @@ export const documentsAPI = {
     return response.data;
   },
 };
+
+export default authAPI;
