@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "oauth2_provider",
     "corsheaders",
     "posts",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -153,3 +154,21 @@ REST_FRAMEWORK = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
+
+# Authentication backends (for username/email login variability)
+AUTHENTICATION_BACKENDS = [
+    'users.backends.EmailOrUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# OAuth2 settings
+OAUTH2_PROVIDER = {
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 3600, # 1 hr
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 86400, # 24 hrs
+    'ROTATE_REFRESH_TOKEN': True,
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
+    
+}

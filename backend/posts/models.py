@@ -9,7 +9,7 @@ def validate_pdf(file):
         raise ValidationError("File too large (max 5 MB).")
 
 class Document(models.Model):
-    post=models.CharField(max_length=200,blank=True)
+    post = models.CharField(max_length=200,blank=True)
     title = models.CharField(max_length=200, blank=True)
     file = models.FileField(upload_to="pdfs/", validators=[validate_pdf])
     uploaded_at = models.DateTimeField(auto_now_add=True)
