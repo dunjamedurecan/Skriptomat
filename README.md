@@ -37,4 +37,4 @@ Ovaj projekt je rezultat timskog rada u sklopu projektnog zadatka kolegija Progr
 
 
 ## Licenca
- 
+Ovaj repozitorij sadrži otvoreni obrazovni sadržaji (eng. Open Educational Resources) i licenciran je prema pravilima Creative Commons licencije koja omogućava da preuzmete djelo, podijelite ga s drugima uz uvjet da navođenja autora, ne upotrebljavate ga u komercijalne svrhe te dijelite pod istim uvjetima [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License HR](https://creativecommons.org/licenses/by-nc/4.0/deed.hr). 
