@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import {authAPI} from '../api/auth';
+import authAPI from '../api/auth';
 import styles from '../styles/Login.module.css';
 import { useAuth } from '../context/AuthContext';
 
@@ -18,6 +18,8 @@ export default function Login(){
     const [loading, setLoading] = useState(false);
     
     const navigate=useNavigate();
+
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     // This is so that logged in users cannot get back into Login
     useEffect(() => {
         if (isAuthenticated) {
@@ -25,6 +27,73 @@ export default function Login(){
         }
     }, [isAuthenticated, navigate]);
 
+     useEffect(() => {
+        if (!GOOGLE_CLIENT_ID) {
+            console.warn('VITE_GOOGLE_CLIENT_ID / REACT_APP_GOOGLE_CLIENT_ID not set');
+            return;
+        }
+       console.log('authAPI object:', authAPI);
+    console.log('authAPI.google typeof:', typeof authAPI?.google);
+    console.log('window.location.origin:', window.location.origin);
+        // avoid loading twice
+        if (document.getElementById('google-client-script')) return;
+
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.id = 'google-client-script';
+        script.onload = () => {
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                window.google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleCredentialResponse,
+                    ux_mode: 'popup' // popup is friendlier for SPA
+                });
+
+                // render button inside container
+                const container = document.getElementById('googleSignInDiv');
+                if (container) {
+                    window.google.accounts.id.renderButton(container, {
+                        theme: 'outline',
+                        size: 'large',
+                        text: 'signin_with'
+                    });
+                }
+            }
+        };
+        document.body.appendChild(script);
+    })
+    async function handleCredentialResponse(response) {
+        setError('');
+        setLoading(true);
+
+        const id_token = response?.credential;
+        if (!id_token) {
+            setError('Google login nije uspio (nema tokena).');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            // send id_token to your backend endpoint
+            const data = await authAPI.google({ id_token });
+            // data should contain access_token, refresh_token, user
+            login(
+                {
+                    access_token: data.access_token,
+                    refresh_token: data.refresh_token
+                },
+                data.user
+            );
+            navigate('/feed');
+        } catch (err) {
+            console.error('Google login error:', err);
+            setError(err.response?.data?.error || 'Greška pri Google prijavi');
+        } finally {
+            setLoading(false);
+        }
+    }
     function handleChange(e){
         setFormData({
             ...formData,
@@ -132,7 +201,10 @@ export default function Login(){
                     </button>
 
                 </form>
-
+                    <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
+                    {/* Google button will be rendered here by Google's script */}
+                    <div id="googleSignInDiv"></div>
+                </div>
                 <div className={styles.registerLink}>
                     <p>Nemaš račun? <Link to="/registration">Registriraj se</Link></p>
                 </div>
