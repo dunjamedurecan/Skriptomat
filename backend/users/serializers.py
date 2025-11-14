@@ -52,16 +52,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create and return new user with hashed password"""
         # Remove password_confirm (not needed for User model)
+        password = validated_data.pop('password')
         validated_data.pop('password_confirm')
         
-        # Create user with hashed password
-        user = User.objects.create_user(
-            email=validated_data['email'],
-            username=validated_data['username'],
-            password=validated_data['password'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', '')
-        )
+        # Create user WITHOUT password first
+        user = User(**validated_data)
+        # Use set_password to properly hash it
+        user.set_password(password)
+        user.save()
         return user
 
 
