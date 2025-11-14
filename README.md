@@ -19,6 +19,8 @@ Ovaj projekt je rezultat timskog rada u sklopu projektnog zadatka kolegija Progr
 | F-009       | Sustav omogućuje administratorima uklanjanje i uređivanje objava.                | Visok     | Zahtjev dionika | Administratori nadgledaju rad sustava.
 | F-010       | Sustav omogućuje objavu materijala u pdf formatu.                | Visok     | Zahtjev dionika | Materijali se objavljuju u pdf formatu.
 | F-011       | Sustav omogućuje dobivanje obavijesti za aktivnosti na platformi.                | Visok     | Zahtjev dionika | Kada moderator potvrdi skriptu, korisniku koji je objavio skriptu dolazi potvrda/obavijest o prihvaćanju skripte.
+| F-012       | Sustav omogućuje regularnim korisnicima preuzimanje materijala.                          | Visok     | Zahtjev dionika          | Korisnik može preuzeti objavljene materijale drugog korisnika ako je autor skripte dopustio preuzimanje.                    |
+
 
 
 ## Tehnologije
