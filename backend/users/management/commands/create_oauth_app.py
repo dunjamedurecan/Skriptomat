@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
 from oauth2_provider.models import Application
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+import secrets
 
 User = get_user_model()
 
@@ -21,10 +23,11 @@ class Command(BaseCommand):
         
         if not admin_user:
             # Create a system user for OAuth app ownership
+            random_password = secrets.token_urlsafe(32)
             admin_user = User.objects.create_superuser(
                 username='oauth_admin',
                 email='admin@skriptomat.local',
-                password=User.objects.make_random_password()
+                password=random_password
             )
             self.stdout.write(self.style.WARNING('Created system admin user for OAuth application'))
 
