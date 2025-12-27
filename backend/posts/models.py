@@ -20,6 +20,10 @@ class Document(models.Model):
         related_name='documents',
         null=True
     )
+    likes=models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_documents',blank=True)
+
+    def total_likes(self):
+        return self.likes.count()
 
     def __str__(self):
         return self.title or f"Document {self.pk}"
