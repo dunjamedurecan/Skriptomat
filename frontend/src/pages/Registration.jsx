@@ -18,6 +18,7 @@ export default function Registration(){
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const [step, setStep]=useState(1);
 
     // Email validation
     function validateEmail(email) {
@@ -98,6 +99,66 @@ export default function Registration(){
         <div className={styles.loginContainer}>
             <h1>Registracija</h1>
             <div className={regStyles.registrationBox}>
+                {step===1 ? (
+                    //Prvi korak - unos emaila i lozinke
+                    <form onSubmit={handleFirstStep} className={styles.loginForm}>
+                        <div className={styles.inputRow}>
+                            <div className={styles.formGroup}>
+                                <label>Email</label>
+                                <input
+                                    type='email'
+                                    name='email'
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    placeholder='example@fer.hr'
+                                    required
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label>Lozinka</label>
+                                <input
+                                    type='password'
+                                    name='password'
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    placeholder='••••••••'
+                                    required
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label>Ponovi lozinku</label>
+                                <input
+                                    type='password'
+                                    name='password_confirm'
+                                    value={formData.password_confirm}
+                                    onChange={handleChange}
+                                    placeholder='••••••••'
+                                    required
+                                />
+                            </div>
+                        </div>
+                        {error && <p className={styles.error}>{error}</p>}
+                        <button type="submit" className={styles.loginButton} disabled={loading}>{loading ? "Registracija..." : "Dalje"}</button>
+                    </form>
+                ):(
+                    //Drugi korak - korisničko ime, vrsta user-a, unos fakulteta...
+                    <form onSubmit={handleSecondStep} className={styles.loginForm}>
+                        <div className={regStyles.inputRow}>
+                            <div className={regStyles.formGroup}>
+                                <label>Korisničko ime</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                    placeholder='korisnik123'
+                                    required
+                                />
+                            </div>
+                            
+                        </div>
+                    </form>
+                )}
                 <form onSubmit={handleSubmit} className={styles.loginForm}>
                     
                     {/* Email and Username Row */}
