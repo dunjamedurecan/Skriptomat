@@ -4,6 +4,7 @@ import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
 import { documentsAPI } from '../api/auth';
+import ProfileHover from './ProfileHover';
 
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -118,6 +119,7 @@ export default function Feed() {
         <h1>Skriptomat</h1>
         <nav className={commonStyles.navbar}>
           <button onClick={logout}>Odjavi se</button>
+          <button><Link to="/my-profile">Profil</Link></button>
         </nav>
       </header>
 
@@ -186,7 +188,7 @@ export default function Feed() {
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
                     </p>
                   )}
-                  <p>Objavio: {post.user||'Nepoznato'}</p>
+                  <p>Objavio: <ProfileHover user={post.user || 'Nepoznato'} /></p>
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                 </div>
               ))
