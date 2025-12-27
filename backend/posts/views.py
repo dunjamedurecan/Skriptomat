@@ -9,3 +9,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class=DocumentSerializer
     permission_classes=[permissions.IsAuthenticated]
     parser_classes=[MultiPartParser,FormParser]
+
+    def perform_create(self, serializer):
+        # Automatski postavlja prijavljenog korisnika kao vlasnika dokumenta
+        serializer.save(user=self.request.user)

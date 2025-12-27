@@ -30,6 +30,7 @@ export default function Feed() {
   const fetchPosts = async () => {
     try {
       const data = await documentsAPI.getAll();
+      console.log("Api response",data);
       setPosts(data);
     } catch (err) {
       console.error('fetchPosts error', err);
@@ -185,6 +186,7 @@ export default function Feed() {
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
                     </p>
                   )}
+                  <p>Objavio: {post.user||'Nepoznato'}</p>
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                 </div>
               ))
