@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "oauth2_provider",
     "corsheaders",
-    "django_extensions",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
