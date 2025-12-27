@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../api/auth';
 import styles from '../styles/Login.module.css';
@@ -11,7 +11,9 @@ export default function Registration(){
         password: '',
         password_confirm: '',
         first_name: '',
-        last_name: ''
+        last_name: '',
+        user_type: '',
+        faculty: ''
     });
     
     // UI state
@@ -19,6 +21,7 @@ export default function Registration(){
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [step, setStep]=useState(1);
+    const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
     // Email validation
     function validateEmail(email) {
@@ -40,25 +43,14 @@ export default function Registration(){
         setError('');
 
         // Validation
-        if (!validateEmail(formData.email)) {
-            setError('Upiši ispravnu email adresu');
-            return;
-        }
+        
 
         if (!formData.username) {
             setError('Korisničko ime je obavezno');
             return;
         }
 
-        if (formData.password.length < 8) {
-            setError('Lozinka mora imati minimalno 8 znakova');
-            return;
-        }
-
-        if (formData.password !== formData.password_confirm) {
-            setError('Lozinke se ne podudaraju');
-            return;
-        }
+        
 
         // Call backend
         setLoading(true);
@@ -93,7 +85,126 @@ export default function Registration(){
             setLoading(false);
         }
     }
+    async function handleFirstStep(e){
+        e.preventDefault();
+        setError('');
 
+        if (!validateEmail(formData.email)) {
+            setError('Upiši ispravnu email adresu');
+            return;
+        }
+
+        if (formData.password.length < 8) {
+            setError('Lozinka mora imati minimalno 8 znakova');
+            return;
+        }
+
+        if (formData.password !== formData.password_confirm) {
+            setError('Lozinke se ne podudaraju');
+            return;
+        }
+        setStep(2);
+    }
+
+    async function handleSecondStep(e){
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+            const response = await authAPI.register(formData);
+            console.log('Registration successful:', response);
+            
+            // Show success message and redirect
+            alert('Registracija uspješna! Molimo prijavite se.');
+            navigate('/login');
+            
+        } catch (err) {
+            console.error('Registration error:', err);
+            
+            // Handle different error types
+            if (err.response?.data) {
+                // Backend validation errors
+                const errors = err.response.data;
+                if (errors.email) {
+                    setError(errors.email[0]);
+                } else if (errors.username) {
+                    setError(errors.username[0]);
+                } else if (errors.password) {
+                    setError(errors.password[0]);
+                } else {
+                    setError('Greška pri registraciji. Pokušaj ponovno.');
+                }
+            } else {
+                setError('Greška pri povezivanju sa serverom');
+            }
+        } finally {
+            setLoading(false);
+        }
+
+    }
+    useEffect(() => {
+            if (!GOOGLE_CLIENT_ID) {
+                console.warn('VITE_GOOGLE_CLIENT_ID not set');
+                return;
+            }
+            
+            // avoid loading twice
+            if (document.getElementById('google-client-script')) return;
+    
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.id = 'google-client-script';
+            script.onload = () => {
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    window.google.accounts.id.initialize({
+                        client_id: GOOGLE_CLIENT_ID,
+                        callback: handleCredentialResponse,
+                        ux_mode: 'popup' // popup is friendlier for SPA
+                    });
+    
+                    // render button inside container
+                    const container = document.getElementById('googleSignInDiv');
+                    if (container) {
+                        window.google.accounts.id.renderButton(container, {
+                            theme: 'outline',
+                            size: 'large',
+                            text: 'signin_with'
+                        });
+                    }
+                }
+            };
+            document.body.appendChild(script);
+        }, [GOOGLE_CLIENT_ID])
+        async function handleCredentialResponse(response) {
+                setError('');
+                setLoading(true);
+        
+                const id_token = response?.credential;
+                if (!id_token) {
+                    setError('Google login nije uspio (nema tokena).');
+                    setLoading(false);
+                    return;
+                }
+        
+                try {
+                    // send id_token to your backend endpoint
+                    const data = await authAPI.google({ id_token });
+                    
+                    setFormData({
+                        ...formData,
+                        email:data.user?.email || '',
+                        username: data.user?.username || ''
+                    });
+                    setStep(2);
+                } catch (err) {
+                    console.error('Google login error:', err);
+                    setError(err.response?.data?.error || 'Greška pri Google prijavi');
+                } finally {
+                    setLoading(false);
+                }
+            }
     return(
 
         <div className={styles.loginContainer}>
@@ -136,6 +247,10 @@ export default function Registration(){
                                     required
                                 />
                             </div>
+                             <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
+                            {/* Google button will be rendered here by Google's script */}
+                    <div id="googleSignInDiv"></div>
+                </div>
                         </div>
                         {error && <p className={styles.error}>{error}</p>}
                         <button type="submit" className={styles.loginButton} disabled={loading}>{loading ? "Registracija..." : "Dalje"}</button>
@@ -155,41 +270,8 @@ export default function Registration(){
                                     required
                                 />
                             </div>
-                            
                         </div>
-                    </form>
-                )}
-                <form onSubmit={handleSubmit} className={styles.loginForm}>
-                    
-                    {/* Email and Username Row */}
-                    <div className={regStyles.inputRow}>
-                        <div className={regStyles.formGroup}>
-                            <label>Email</label>
-                            <input
-                                type='email'
-                                name='email'
-                                value={formData.email}
-                                onChange={handleChange}
-                                placeholder='example@fer.hr'
-                                required
-                            />
-                        </div>
-
-                        <div className={regStyles.formGroup}>
-                            <label>Korisničko ime</label>
-                            <input
-                                type='text'
-                                name='username'
-                                value={formData.username}
-                                onChange={handleChange}
-                                placeholder='korisnik123'
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    {/* First Name and Last Name Row */}
-                    <div className={regStyles.inputRow}>
+                        <div className={regStyles.inputRow}>
                         <div className={regStyles.formGroup}>
                             <label>Ime (opcionalno)</label>
                             <input
@@ -212,51 +294,36 @@ export default function Registration(){
                             />
                         </div>
                     </div>
-
-                    {/* Password and Confirm Password Row */}
                     <div className={regStyles.inputRow}>
                         <div className={regStyles.formGroup}>
-                            <label>Lozinka</label>
-                            <input
-                                type='password'
-                                name='password'
-                                value={formData.password}
+                            <label>Oblik korisnika</label>
+                            <select
+                                name="user_type"
+                                value={formData.user_type}
                                 onChange={handleChange}
-                                placeholder='••••••••'
                                 required
-                            />
+                            >
+                                <option value="">Odaberi oblik korisnika</option>
+                                <option value="student">Student</option>
+                                <option value="moderator">Moderator</option>
+                            </select>
                         </div>
-
                         <div className={regStyles.formGroup}>
-                            <label>Ponovi lozinku</label>
+                            <label>Fakultet</label>
                             <input
-                                type='password'
-                                name='password_confirm'
-                                value={formData.password_confirm}
+                                type="text"
+                                name="faculty"
+                                value={formData.faculty}
                                 onChange={handleChange}
-                                placeholder='••••••••'
+                                placeholder="Npr. Fakultet elektrotehnike i računarstva"
                                 required
                             />
                         </div>
                     </div>
-
-                    {/* Error message */}
                     {error && <p className={styles.error}>{error}</p>}
-
-                    {/* Submit button */}
-                    <button
-                        type='submit'
-                        className={styles.loginButton}
-                        disabled={loading}
-                    >
-                        {loading ? 'Registracija...' : 'Registriraj se'}
-                    </button>
-
-                    {/* Link to login */}
-                    <p style={{ marginTop: '1rem', textAlign: 'center' }}>
-                        Već imaš račun? <Link to="/login">Prijavi se</Link>
-                    </p>
-                </form>
+                    <button type="submit" className={styles.loginButton} disabled={loading}>{loading ? "Završi registraciju..." : "Registriraj se"}</button>
+                    </form>
+                )}
             </div>
         </div>
     );
