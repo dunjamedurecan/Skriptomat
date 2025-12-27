@@ -38,10 +38,15 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment & secrets
-.env
-.env.local
-.env.*.local
+.env                    # Local overrides (ignored)
+.env.local             # Local secrets (ignored)
+.env.*.local           # Local environment-specific (ignored)
 secrets.json
+
+# Keep environment templates in Git:
+# .env.example           ✅ Tracked
+# .env.development       ✅ Tracked (dev config)
+# .env.production        ✅ Tracked (prod config)
 
 # IDEs
 .vscode/
@@ -64,3 +69,16 @@ docker-compose.override.yml
 *.dump
 test.jsx
 test.css
+
+#Local setup documentation & helper scripts (keep in repo for team)
+#Uncomment below if you want to ignore these files:
+BRZI-START.md
+LOKALNO-POKRETANJE.md
+SAZETAK.md
+DEV-VS-PROD.md
+start-local.ps1
+backend/check-users.ps1
+backend/create-test-users.ps1
+quick-test.ps1
+test-login.ps1
+test_login_debug.py

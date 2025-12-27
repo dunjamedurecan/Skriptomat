@@ -1,7 +1,16 @@
 import axios from 'axios';
 
-// Base URL for your Django backend - reads from environment variable
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// Base URL for your Django backend
+// DEV: Uses Vite proxy (/api -> http://localhost:8000)
+// PROD: Uses full URL from .env.production
+const BASE_URL = import.meta.env.VITE_API_URL || (
+  import.meta.env.DEV 
+    ? '/api'  // Development: Vite proxy
+    : 'https://skriptomat-bacend-base.onrender.com/api'  // Production: Render backend
+);
+
+console.log(`🔧 Environment: ${import.meta.env.MODE}`);
+console.log(`🌐 API Base URL: ${BASE_URL}`);
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -9,7 +18,32 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Important for CORS with credentials
+  timeout: 10000, // 10 second timeout
 });
+
+// Add request/response logging in development
+if (import.meta.env.DEV) {
+  apiClient.interceptors.request.use((config) => {
+    console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
+    return config;
+  });
+  
+  apiClient.interceptors.response.use(
+    (response) => {
+      console.log('✅ API Response:', response.config.url, response.status);
+      return response;
+    },
+    (error) => {
+      console.error('❌ API Error:', error.config?.url, error.message);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      }
+      return Promise.reject(error);
+    }
+  );
+}
 
 // Request interceptor - adds auth token to every request
 apiClient.interceptors.request.use(
@@ -54,8 +88,10 @@ apiClient.interceptors.response.use(
         }
         
         // Try to refresh the access token
-        const response = await axios.post(`${BASE_URL}/users/token/refresh/`, {
+        const response = await axios.post('/api/users/token/refresh/', {
           refresh_token: refreshToken,
+        }, {
+          withCredentials: true
         });
         
         // Save new tokens

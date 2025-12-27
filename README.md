@@ -21,32 +21,57 @@
 - Recommended: VS Code
 
 ## Quickstart (developer setup)
+
+### 🚀 Brzi Start (PowerShell - Windows)
+```powershell
+# Automatski setup cijelog projekta
+.\start-local.ps1
+```
+
+**Za detaljne upute, vidi:**
+- 📘 **[BRZI-START.md](BRZI-START.md)** - TL;DR verzija s konkretnim stanjem projekta
+- 📗 **[LOKALNO-POKRETANJE.md](LOKALNO-POKRETANJE.md)** - Kompletni vodič s troubleshooting sekcijom
+
+### Manual Setup
 1. Clone the repository:
-   git clone https://github.com/your-username/skriptomat.git
-   cd skriptomat
+   ```bash
+   git clone https://github.com/dunjamedurecan/Skriptomat.git
+   cd Skriptomat
+   ```
 
 2. Backend setup:
-   - Create and activate a virtual environment:
-     python -m venv .venv
-     .\.venv\Scripts\Activate
-   - Install dependencies:
-     pip install -r backend/requirements.txt
-   - Copy .env.example to .env and fill in your database credentials
-   - Run migrations:
-     cd backend
-     python manage.py migrate
-   - Start the server:
-     python manage.py runserver
+   ```powershell
+   cd backend
+   python -m venv .venv
+   .\.venv\Scripts\Activate
+   pip install -r requirements.txt
+   cp .env.example .env  # Uredi .env s DB credentialima
+   python manage.py migrate
+   python manage.py create_oauth_app  # Kreira OAuth2 app
+   python manage.py runserver 0.0.0.0:8000
+   ```
 
-3. Frontend setup:
-   - cd frontend
-   - npm install
-   - Copy .env.example to .env
-   - npm run dev
+3. Frontend setup (novi terminal):
+   ```powershell
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-4. When creating new features:
+4. Open in browser:
+   - Frontend: http://localhost:5173
+   - Admin: http://localhost:8000/admin
+
+### Helper Scripts
+- `backend/check-users.ps1` - Provjera korisnika u bazi
+- `backend/create-test-users.ps1` - Kreiranje test korisnika
+- `start-local.ps1` - Automatski setup cijelog projekta
+
+### When creating new features:
    - Create a new branch:
+     ```bash
      git checkout -b feature/your-feature-name
+     ```
    - Make changes and commit regularly
    - Push to GitHub and create a pull request   
 
