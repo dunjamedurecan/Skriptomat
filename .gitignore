@@ -82,3 +82,5 @@ backend/create-test-users.ps1
 quick-test.ps1
 test-login.ps1
 test_login_debug.py
+
+0003_document_likes.py
