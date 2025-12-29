@@ -5,6 +5,7 @@ import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
 import { documentsAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
+import {FaHeart,FaRegHeart} from 'react-icons/fa';
 
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -31,8 +32,9 @@ export default function Feed() {
   const fetchPosts = async () => {
     try {
       const data = await documentsAPI.getAll();
-      console.log("Api response",data);
-      setPosts(data);
+      const sortedPosts=data.sort((a,b)=>b.total_likes - a.total_likes);
+      console.log("Api response",data); //prilikom učitavanja objave se sortiraju po broju lajkova
+      setPosts(sortedPosts);
     } catch (err) {
       console.error('fetchPosts error', err);
       
@@ -42,6 +44,20 @@ export default function Feed() {
       } else {
         setMessage('Greška pri dohvaćanju objava.');
       }
+    }
+  };
+
+  const handleLike = async (id)=>{
+    try{
+      const response=await documentsAPI.like(id);
+      const updatedPosts=posts.map((post)=>
+        post.id===id ? {...post,total_likes:response.total_likes,liked:response.liked}:post
+      );
+  //sortiranje nakon promjene broja lajkova (da se ne mora ponovno refreshat stranica)
+      const sortedPosts=updatedPosts.sort((a,b)=>b.total_likes-a.total_likes);
+      setPosts(sortedPosts);
+    }catch(err){
+      console.error('handleLike error',err);
     }
   };
 
@@ -181,15 +197,17 @@ export default function Feed() {
             ) : (
               posts.map((post) => (
                 <div key={post.id} className={styles.postItem}>
+                  <p> <ProfileHover user={post.user || 'Nepoznato'} /></p>
+                  <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                   <p>{post.title}</p>
                   <p>{post.post}</p>
+                  
                   {post.file && (
                     <p>
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
                     </p>
                   )}
-                  <p>Objavio: <ProfileHover user={post.user || 'Nepoznato'} /></p>
-                  <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
+                  <button onClick={()=>handleLike(post.id)}className={post.liked ? styles.likedBtn:styles.likeBtn}>{post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}<p>{post.total_likes}</p></button>
                 </div>
               ))
             )}

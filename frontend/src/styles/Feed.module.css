@@ -257,3 +257,29 @@
   text-align: center;
   margin-top: 1rem;
 }
+
+.likedBtn, .likeBtn{
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+.likeBtn .iconOutlined {
+  color: #d1d5db; /* Neutralna siva za obrubljeno srce */
+  transition: color 0.2s;
+}
+
+.likeBtn:hover .iconOutlined {
+  color: #6366f1; 
+}
+
+.likedBtn .iconFilled {
+  color: #6366f1; 
+  transition: transform 0.2s;
+}
+
+.likedBtn .iconFilled:hover {
+  transform: scale(1.2); /* Malo povećajte srce na hover */
+}

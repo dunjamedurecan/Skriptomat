@@ -44,6 +44,11 @@ export const documentsAPI = {
     });
     return response.data;
   },
+
+  like: async(id)=>{
+    const response=await apiClient.post(`/posts/documents/${id}/like/`);
+    return response.data;
+  },
 };
 
 export default authAPI;
