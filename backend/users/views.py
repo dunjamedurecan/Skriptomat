@@ -1,6 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+
+from users.models import Faculty,Role
 from .serializers import UserRegistrationSerializer, UserSerializer
 
 from rest_framework.views import APIView
@@ -22,15 +24,24 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
+       data = request.data
+       role_name = data.get("role")
+       if role_name and not Role.objects.filter(name=role_name).exists():
+            return Response({"role": ["Role does not exist."]}, status=status.HTTP_400_BAD_REQUEST)
+       faculty_name = data.get("faculty")
+       if faculty_name and not Faculty.objects.filter(name=faculty_name).exists():
+            return Response({"faculty": ["Faculty does not exist."]}, status=status.HTTP_400_BAD_REQUEST)
+       print("Podaci iz zahteva:", request.data)
+       serializer = self.get_serializer(data=request.data)
+       if serializer.is_valid():
+            print("Validirani podaci u serializeru:", serializer.validated_data)
             user = serializer.save()
             user_data = UserSerializer(user).data
             return Response(
                 {"message": "Registration successful! Please login.", "user": user_data},
                 status=status.HTTP_201_CREATED,
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
@@ -203,3 +214,53 @@ class GoogleLoginView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+class GoogleRegisterView(APIView):
+    """
+    Google Registration View
+    Koristeći Google id_token potvrđujemo korisnika i zahtevamo popunjavanje dodatnih koraka pre kreiranja.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        id_token = request.data.get("id_token")
+        if not id_token:
+            return Response({"error": "Google id_token is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        tokeninfo_url = "https://oauth2.googleapis.com/tokeninfo"
+        try:
+            r = requests.get(tokeninfo_url, params={"id_token": id_token}, timeout=5)
+            token_info = r.json()
+        except Exception:
+            return Response({"error": "Failed to verify id_token with Google."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Provera grešaka u tokenu
+        if token_info.get("error_description") or token_info.get("error"):
+            return Response({"error": "Invalid id_token."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Proverite da li token odgovara vašoj aplikaciji
+        expected_aud = os.environ.get("GOOGLE_CLIENT_ID")
+        if expected_aud and token_info.get("aud") != expected_aud:
+            return Response({"error": "Invalid token audience."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Ekstrahovanje korisničkih informacija
+        email = token_info.get("email")
+        email_verified = str(token_info.get("email_verified")).lower() in ("true", "1")
+
+        if not email or not email_verified:
+            return Response({"error": "Google account email not available or not verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Proverite da li korisnik već postoji
+        existing_user = User.objects.filter(email=email).first()
+        if existing_user:
+            return Response({
+                "error": "A user with this email already exists.",
+                "step_required": "login"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Prva faza: email potvrđen i vraćamo osnovne podatke
+        return Response({
+            "email": email,
+            "first_name": token_info.get("given_name"),
+            "last_name": token_info.get("family_name"),
+            "message": "Email confirmed. Proceed with second step to finalize registration."
+        }, status=status.HTTP_200_OK)
