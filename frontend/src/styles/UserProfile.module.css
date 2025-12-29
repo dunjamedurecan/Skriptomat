@@ -1,0 +1,45 @@
+/* Glavni blok za stranicu profila */
+.profilePage {
+  display: flex; /* Flexbox za dva stupca */
+  gap: 2rem; /* Razmak između stupaca */
+  margin-top: 2rem; /* Razmak između header-a i sadržaja */
+}
+
+/* Stil za stupac sa korisničkim podacima */
+.profileDetails {
+  flex: 1; /* Stupac zauzima 1 deo širine */
+  max-width: 300px; /* Maksimalna širina stupca */
+  background-color: #fff; /* Svetla pozadina za isticanje */
+  border-radius: 8px; /* Zaobljeni uglovi */
+  padding: 1rem; /* Prostor unutar sekcije */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Blaga senka za isticanje */
+}
+
+/* Naslovi i tekst u profile details */
+.profileDetails h2 {
+  margin-bottom: 1rem; /* Razmak ispod naslova */
+  color: #4a4a8a; /* Boja naslova */
+}
+
+.profileDetails p {
+  margin: 0.5rem 0;
+  color: #555; /* Neutralna boja teksta */
+}
+
+/* Stil za stupac sa objavama */
+.profilePosts {
+  flex: 2; /* Stupac sa objavama zauzima veći deo prostora */
+}
+
+.profilePosts h2 {
+  margin-bottom: 1rem;
+  color: #4a4a8a;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+/* Stil za praznu poruku */
+.profilePosts p {
+  color: #888;
+  font-size: 1rem;
+}

@@ -12,7 +12,7 @@ export default function Registration(){
         password_confirm: '',
         first_name: '',
         last_name: '',
-        user_type: '',
+        role: '',
         faculty: ''
     });
     
@@ -55,6 +55,7 @@ export default function Registration(){
         // Call backend
         setLoading(true);
         try {
+            console.log("Podaci za registraciju:", formData);
             const response = await authAPI.register(formData);
             console.log('Registration successful:', response);
             
@@ -68,6 +69,7 @@ export default function Registration(){
             // Handle different error types
             if (err.response?.data) {
                 // Backend validation errors
+                console.log("Greška kod registracije:",err.response.data);
                 const errors = err.response.data;
                 if (errors.email) {
                     setError(errors.email[0]);
@@ -110,7 +112,9 @@ export default function Registration(){
         e.preventDefault();
         setError('');
         setLoading(true);
+        
         try {
+             console.log("Podaci za registraciju:", formData);
             const response = await authAPI.register(formData);
             console.log('Registration successful:', response);
             
@@ -125,6 +129,7 @@ export default function Registration(){
             if (err.response?.data) {
                 // Backend validation errors
                 const errors = err.response.data;
+                 console.log("Greška kod registracije:",err.response.data);
                 if (errors.email) {
                     setError(errors.email[0]);
                 } else if (errors.username) {
@@ -190,13 +195,14 @@ export default function Registration(){
         
                 try {
                     // send id_token to your backend endpoint
-                    const data = await authAPI.google({ id_token });
-                    
+                    const data = await authAPI.googleRegister({ id_token });
+                    console.log('Google registration successful:', data);
+                    console.log(data.email);
                     setFormData({
                         ...formData,
-                        email:data.user?.email || '',
-                        username: data.user?.username || ''
+                        email:data.email,
                     });
+                    console.log("Postavljeni podaci nakon Google registracije,:",formData);
                     setStep(2);
                 } catch (err) {
                     console.error('Google login error:', err);
@@ -298,8 +304,8 @@ export default function Registration(){
                         <div className={regStyles.formGroup}>
                             <label>Oblik korisnika</label>
                             <select
-                                name="user_type"
-                                value={formData.user_type}
+                                name="role"
+                                value={formData.role}
                                 onChange={handleChange}
                                 required
                             >

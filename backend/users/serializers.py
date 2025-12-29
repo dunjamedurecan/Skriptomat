@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from .models import Role, Faculty
 
 User = get_user_model()  # Gets your custom User model
 
@@ -18,10 +19,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         write_only=True,
         style={'input_type': 'password'}
     )
-    
+    role=serializers.CharField()  
+    faculty=serializers.CharField()
     class Meta:
         model = User
-        fields = ['email', 'username', 'password', 'password_confirm', 'first_name', 'last_name']
+        fields = ['email', 'username', 'password', 'password_confirm', 'first_name', 'last_name','role','faculty']
         extra_kwargs = {
             'first_name': {'required': False},
             'last_name': {'required': False},
@@ -43,9 +45,34 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         
         return value
     
+    def validate_role(self, value):
+        """Ako je role string, traži odgovarajući ID u bazi."""
+        if isinstance(value, str):
+            role = Role.objects.filter(name=value).first()  # Traži po nazivu
+            if not role:
+                raise serializers.ValidationError(f"Role '{value}' does not exist.")
+            print("Pronađena:",role)
+            return role  # Vraćanje ID-a
+        return value
+
+    def validate_faculty(self, value):
+        """Ako je faculty string, traži odgovarajući ID u bazi."""
+        if isinstance(value, str):
+            faculty = Faculty.objects.filter(name=value).first()  # Traži po nazivu
+            if not faculty:
+                raise serializers.ValidationError(f"Faculty '{value}' does not exist.")
+            return faculty  # Vraćanje ID-a
+        return value
+   
+    
     def validate(self, data):
-        """Check if passwords match"""
-        if data['password'] != data['password_confirm']:
+        print("Podaci koji su poslati za validaciju:", data)
+        if "role" not in data:
+            raise serializers.ValidationError({"role": "Role field is required."})
+
+        if "faculty" not in data:
+            raise serializers.ValidationError({"faculty": "Faculty field is required."})
+        if data["password"] != data["password_confirm"]:
             raise serializers.ValidationError({"password": "Passwords do not match."})
         return data
     
@@ -70,5 +97,5 @@ class UserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined','role','faculty']
         read_only_fields = ['id', 'date_joined']
