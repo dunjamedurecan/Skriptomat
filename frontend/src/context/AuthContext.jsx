@@ -38,7 +38,6 @@ export const AuthProvider = ({ children }) => {
 
     initAuth();
   }, []);
-
   // Login function
   const login = (tokens, userData) => {
     // Store tokens

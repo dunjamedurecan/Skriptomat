@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from backend import settings
 
 def validate_pdf(file):
     if file.content_type != "application/pdf":
@@ -13,6 +14,16 @@ class Document(models.Model):
     title = models.CharField(max_length=200, blank=True)
     file = models.FileField(upload_to="pdfs/", validators=[validate_pdf])
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,  # Koristite AUTH_USER_MODEL
+        on_delete=models.CASCADE,
+        related_name='documents',
+        null=True
+    )
+    likes=models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_documents',blank=True)
+
+    def total_likes(self):
+        return self.likes.count()
 
     def __str__(self):
         return self.title or f"Document {self.pk}"
