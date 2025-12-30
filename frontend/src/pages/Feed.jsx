@@ -197,7 +197,7 @@ export default function Feed() {
             ) : (
               posts.map((post) => (
                 <div key={post.id} className={styles.postItem}>
-                  <p> <ProfileHover user={post.user || 'Nepoznato'} /></p>
+                  <div><ProfileHover user={post.user || 'Nepoznato'} /></div> 
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                   <p>{post.title}</p>
                   <p>{post.post}</p>

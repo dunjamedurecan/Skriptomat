@@ -1,5 +1,6 @@
 import React,{useState} from "react";
 import styles from '../styles/ProfileHover.module.css';
+import { Link } from "react-router-dom";
 
 export default function ProfileHover({user}){
     const [showCard,setShowCard]=useState(false);
@@ -19,8 +20,8 @@ export default function ProfileHover({user}){
             {showCard && (
                 <div className={styles.profileCard}>
                     <p><strong>{user}</strong></p>
-                    <button className={styles.messageBtn}>Pošalji poruku</button>
-                    <button className={styles.visitBtn}>Posjeti profil</button>
+                    <p className={styles.link}>Pošalji poruku</p>
+                    <Link to={`/profile/${user}`} className={styles.link}>Posjeti profil</Link>
                 </div>
             )}
         </div>

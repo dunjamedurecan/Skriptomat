@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Role, Faculty
+from .models import Role, Faculty,User
 
 User = get_user_model()  # Gets your custom User model
 
@@ -95,6 +95,8 @@ class UserSerializer(serializers.ModelSerializer):
     Serializer for returning user data (without password).
     Used for displaying user info in responses.
     """
+    role=serializers.StringRelatedField()
+    faculty=serializers.StringRelatedField()
     class Meta:
         model = User
         fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined','role','faculty']

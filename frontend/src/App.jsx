@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Registration from "./pages/Registration";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserProfile from "./pages/UserProfile";
+import ViewProfile from "./pages/ViewProfile";
 
 export default function App(){
   return(
@@ -16,6 +17,7 @@ export default function App(){
         <Route path="/login" element={<Login/>}/>
         <Route path="/registration" element={<Registration/>}/>
         <Route path="/my-profile" element={<UserProfile/>}/>
+        <Route path="/profile/:username" element={<ViewProfile/>}/>
         <Route
           path="/feed"
           element={

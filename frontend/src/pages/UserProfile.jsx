@@ -7,18 +7,26 @@ import { documentsAPI } from '../api/auth'; // Fetch za korisničke objave
 import feedstyles from '../styles/Feed.module.css';
 
 export default function UserProfile() {
-  const { user, logout } = useAuth(); // Dohvatanje korisničkih podataka i funkcije za odjavu
+  const { user, logout } =useAuth(); // Dohvatanje korisničkih podataka i funkcije za odjavu
   const [posts, setPosts] = useState([]); // Stanje za prikaz objava
   const [loading, setLoading] = useState(true); // Prikaz učitavanja 
 
   useEffect(() => {
+    if(user)
     fetchUserPosts(); // Povlačenje korisničkih objava prilikom učitavanja
-  }, []);
+  }, [user]);
 
   const fetchUserPosts = async () => {
     try {
+       if (!user) {
+      console.warn('Korisnik nije prijavljen. Preskačem dohvaćanje objava.');
+      return;
+    }
+      console.log(user);
       const data = await documentsAPI.getAll(); // Povlačenje svih objava
-      const userPosts = data.filter((post) => post.user === user.username); // Filtriranje po korisničkom imenu
+      const userPosts = user
+  ? data.filter((post) => post.user === user.username)
+  : [];
       setPosts(userPosts); // Postavljanje u stanje
     } catch (err) {
       console.error('Greška pri dohvaćanju objava:', err);
@@ -26,6 +34,16 @@ export default function UserProfile() {
       setLoading(false);
     }
   };
+
+  const roleNameMap={
+    1: 'Student',
+    2: 'Moderator',
+    3: 'Administrator',
+  };
+
+  if(!user){
+    return <p>Učitavanje korisničkih podataka...</p>;
+  }
 
   return (
     <div className={commonStyles.container}>
@@ -43,6 +61,7 @@ export default function UserProfile() {
         <div className={styles.profileDetails}>
           <h2>Korisničko ime: {user.username}</h2>
           <p>Email: {user.email}</p>
+          <p>Tip korisnika: {roleNameMap[user.role]}</p>
           <p>Broj objava: {posts.length}</p>
         </div>
 
@@ -54,8 +73,9 @@ export default function UserProfile() {
           ) : posts.length === 0 ? (
             <p>Nemate objava.</p>
           ) : (
-            posts.map((post) => (
-              <div key={post.id} className={styles.postItem}>
+            <div className={feedstyles.postsList}>
+            {posts.map((post) => (
+              <div key={post.id} className={feedstyles.postItem}>
                 <h3>{post.title}</h3>
                 <p>{post.post}</p>
                 {post.file && (
@@ -66,7 +86,8 @@ export default function UserProfile() {
                   </p>
                 )}
               </div>
-            ))
+            ))}
+            </div>
           )}
         </div>
       </main>
