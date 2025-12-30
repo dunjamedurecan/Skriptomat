@@ -29,12 +29,10 @@ export default function Login(){
 
      useEffect(() => {
         if (!GOOGLE_CLIENT_ID) {
-            console.warn('VITE_GOOGLE_CLIENT_ID / REACT_APP_GOOGLE_CLIENT_ID not set');
+            console.warn('VITE_GOOGLE_CLIENT_ID not set');
             return;
         }
-       console.log('authAPI object:', authAPI);
-    console.log('authAPI.google typeof:', typeof authAPI?.google);
-    console.log('window.location.origin:', window.location.origin);
+        
         // avoid loading twice
         if (document.getElementById('google-client-script')) return;
 
@@ -63,7 +61,7 @@ export default function Login(){
             }
         };
         document.body.appendChild(script);
-    })
+    }, [GOOGLE_CLIENT_ID])
     async function handleCredentialResponse(response) {
         setError('');
         setLoading(true);
@@ -120,7 +118,6 @@ export default function Login(){
         setLoading(true);
         try {
             const response = await authAPI.login(formData);
-            console.log('Login successful:', response);
 
             // Store tokens in localStorage
             login(
