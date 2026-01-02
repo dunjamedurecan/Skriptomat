@@ -25,6 +25,11 @@ export const authAPI = {
     const response = await apiClient.post('/users/google/', { id_token });
     return response.data;
   },
+
+  googleRegister: async ({id_token})=>{
+    const response=await apiClient.post('/users/googleregister/',{id_token});
+    return response.data;
+  }
 };
 
 // Document API functions
@@ -42,6 +47,11 @@ export const documentsAPI = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return response.data;
+  },
+
+  like: async(id)=>{
+    const response=await apiClient.post(`/posts/documents/${id}/like/`);
     return response.data;
   },
 };

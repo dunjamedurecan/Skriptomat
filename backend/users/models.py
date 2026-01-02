@@ -3,8 +3,17 @@ from django.db import models
 
 
 class Role(models.Model):
+    STUDENT='student'
+    MODERATOR='moderator'
+    ADMIN='admin'
+
+    ROLE_CHOICES=[
+        (STUDENT,'Student'),
+        (MODERATOR,'Moderator'),
+        (ADMIN,'Admin'),
+    ]
     """User roles (Student, Admin, etc.)"""
-    name = models.CharField(unique=True, max_length=50)
+    name = models.CharField(unique=True, choices=ROLE_CHOICES,max_length=50)
 
     def __str__(self):
         return self.name
@@ -12,6 +21,19 @@ class Role(models.Model):
     class Meta:
         db_table = 'roles'
 
+class Faculty(models.Model):
+    FER='Fakultet elektrotehnike i računarstva'
+
+    FACULTY_CHOICES=[
+        (FER,'Fakultet elektrotehnike i računarstva'),
+    ]
+    name=models.CharField(max_length=255,choices=FACULTY_CHOICES,unique=True)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        db_table = 'faculties'
 
 class User(AbstractUser):
     """Custom User model extending Django's built-in authentication"""
@@ -32,7 +54,14 @@ class User(AbstractUser):
     
     # Make email required and unique
     email = models.EmailField(unique=True)
-    
+
+    faculty=models.ForeignKey(
+        Faculty,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='users'
+    )
     # Login with email instead of username
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # Required when creating superuser
@@ -42,4 +71,16 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
+    
+    def is_student(self):
+        return self.role and self.role.name.lower()=='student'
+    
+    def is_moderator(self):
+        return self.role and self.role.name.lower()=='moderator'
+    
+    def is_admin(self):
+        return self.role and self.role.name.lower()=='admin'
+    
+    def get_username(self):
+        return self.username
 

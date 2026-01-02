@@ -78,5 +78,15 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+export const getUserProfile=async(username)=>{
+  try{
+    const response =await apiClient.get(`/users/profile/${username}/`);
+    console.log("Dohvaćeni profil korisnika:",response.data);
+    return response.data;
+  }catch(err){
+    console.error("Greška prilikom dohvatanja korisničkog profila:", err);
+    throw err;
+  }
+};
 
 export default apiClient;
