@@ -5,6 +5,7 @@ import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
 import { documentsAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
+import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
 
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
@@ -197,7 +198,7 @@ export default function Feed() {
             ) : (
               posts.map((post) => (
                 <div key={post.id} className={styles.postItem}>
-                  <p> <ProfileHover user={post.user || 'Nepoznato'} /></p>
+                  <p><ProfileHover user={post.user || 'Nepoznato'} /></p>
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                   <p>{post.title}</p>
                   <p>{post.post}</p>
@@ -207,7 +208,20 @@ export default function Feed() {
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
                     </p>
                   )}
-                  <button onClick={()=>handleLike(post.id)}className={post.liked ? styles.likedBtn:styles.likeBtn}>{post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}<p>{post.total_likes}</p></button>
+                  
+                  <div className={styles.postActions}>
+                    <button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
+                      {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
+                      <p>{post.total_likes}</p>
+                    </button>
+                    
+                    {/* Buy Me a Coffee button - only shows if author has PayPal email */}
+                    <BuyMeACoffee 
+                      authorPaypalEmail={post.user?.paypal_email}
+                      authorName={post.user?.username || post.user?.first_name || 'autora'}
+                      postTitle={post.title}
+                    />
+                  </div>
                 </div>
               ))
             )}

@@ -65,7 +65,6 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # "backend.middleware.SecurityMonitoringMiddleware",  # TEMPORARILY DISABLED FOR DEBUG
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -195,34 +194,4 @@ TEMPLATES = [
         },
     },
 ]
-
-# Logging configuration - prati sve sumnjive aktivnosti, 5.12. 14:53
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '[{levelname}] {asctime} {name} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'security_file': {
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'security.log',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'backend.middleware': {
-            'handlers': ['console', 'security_file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-    },
-}
 SITE_ID=1

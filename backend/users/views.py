@@ -1,9 +1,14 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from users.models import Faculty,Role
-from .serializers import UserRegistrationSerializer, UserSerializer
+from users.models import Faculty, Role
+from .serializers import (
+    UserRegistrationSerializer, 
+    UserSerializer, 
+    UserProfileUpdateSerializer,
+    PublicUserProfileSerializer
+)
 
 from rest_framework.views import APIView
 from oauth2_provider.models import Application, AccessToken, RefreshToken
@@ -11,6 +16,7 @@ from oauth2_provider.settings import oauth2_settings
 from oauthlib.common import generate_token
 from django.utils.timezone import now, timedelta
 from django.contrib.auth import authenticate, get_user_model
+from django.shortcuts import get_object_or_404
 
 import os
 import requests
@@ -264,3 +270,46 @@ class GoogleRegisterView(APIView):
             "last_name": token_info.get("family_name"),
             "message": "Email confirmed. Proceed with second step to finalize registration."
         }, status=status.HTTP_200_OK)
+
+
+class CurrentUserView(APIView):
+    """
+    GET /api/users/me/ - Get current user's profile
+    PATCH /api/users/me/ - Update current user's profile (including PayPal email for donations)
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Return current user's full profile data"""
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        """Update current user's profile settings"""
+        serializer = UserProfileUpdateSerializer(
+            request.user, 
+            data=request.data, 
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            # Return full user data after update
+            return Response(
+                UserSerializer(request.user).data, 
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PublicUserProfileView(APIView):
+    """
+    GET /api/users/profile/<user_id>/ - Get public profile of any user
+    Used to check if a post author accepts donations
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request, user_id):
+        """Return public profile data for a user"""
+        user = get_object_or_404(User, id=user_id)
+        serializer = PublicUserProfileSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
