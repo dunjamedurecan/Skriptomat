@@ -63,12 +63,6 @@ export default function UserProfile() {
     }
   };
 
-  const roleNameMap = {
-    1: 'Student',
-    2: 'Moderator',
-    3: 'Administrator',
-  };
-
   if (!user) {
     return <p>Učitavanje korisničkih podataka...</p>;
   }
@@ -89,7 +83,7 @@ export default function UserProfile() {
         <div className={styles.profileDetails}>
           <h2>Korisničko ime: {user.username}</h2>
           <p>Email: {user.email}</p>
-          <p>Tip korisnika: {roleNameMap[user.role]}</p>
+          <p>Tip korisnika: {user.role}</p>
           <p>Broj objava: {posts.length}</p>
 
           {/* PayPal Email Settings */}
