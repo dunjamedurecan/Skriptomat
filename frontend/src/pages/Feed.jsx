@@ -8,6 +8,8 @@ import ProfileHover from './ProfileHover';
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
 
+//dodaj odobravanje objava za moderatora
+
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Feed() {
@@ -130,6 +132,28 @@ export default function Feed() {
     }
   };
 
+  const handleApprove=async(id)=>{
+    try{
+      const response=await documentFeedAPI.approve(id);
+      setMessage('Objava odobrena.');
+      setPosts(posts.filter((post)=>post.id!==id));
+    } catch(err){
+      console.error('handleApprove error', err);
+      setMessage('Greška pri odobravanju objave.');
+    }
+  };
+
+  const handleDecline=async(id)=>{
+    try{
+      const response=await documentFeedAPI.decline(id);
+      setMessage('Objava odbijena.');
+      setPosts(posts.filter((post)=>post.id!==id));
+    } catch(err){
+      console.error('handleDecline error', err);
+      setMessage('Greška pri odbijanju objave.');
+    }
+  };
+
   return (
     <div className={commonStyles.container}>
       <header>
@@ -210,10 +234,14 @@ export default function Feed() {
                   )}
                   
                   <div className={styles.postActions}>
-                    <button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
+                    {user.role==='student' ? (<button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
                       {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
                       <p>{post.total_likes}</p>
-                    </button>
+                    </button>):(
+                      <><button onClick={()=>handleApprove(post.id)}>Approve</button>
+                    <button onClick={()=>handleDecline(post.id)}>Decline</button></>)
+                    }
+                    
                     
                     {/* Buy Me a Coffee button - only shows if author has PayPal email */}
                     <BuyMeACoffee 

@@ -75,11 +75,21 @@ export const documentsAPI = {
     const response=await apiClient.post(`/posts/documents/${id}/like/`);
     return response.data;
   },
+
+  
 };
 
 export const documentFeedAPI={
   getAll: async () => {
     const response = await apiClient.get('/posts/documents-feed/');
+    return response.data;
+  },
+  approve: async(id)=>{
+    const response=await apiClient.post(`/posts/documents-feed/${id}/approve/`);
+    return response.data;
+  },
+  decline: async(id)=>{
+    const response=await apiClient.post(`/posts/documents-feed/${id}/decline/`);
     return response.data;
   }
 }

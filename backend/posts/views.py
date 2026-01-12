@@ -38,3 +38,21 @@ class PostViewSet(viewsets.ModelViewSet):
         if user.role and user.role.name.lower()=='moderator':
             return Document.objects.filter(status=Document.Status.PENDING).order_by("-uploaded_at")
         return Document.objects.filter(status=Document.Status.APPROVED)
+    
+    @action(detail=True, methods=['post'])
+    def approve(self,request,pk=None):
+        document=self.get_object()
+        if request.user.role.name.lower()!='moderator':
+            return Response({'detail':'Only moderators can approve documents.'},status=403)
+        document.status=Document.Status.APPROVED
+        document.save()
+        return Response({'detail':'Document approved.'})
+    
+    @action(detail=True, methods=['post'])
+    def reject(self,request,pk=None):
+        document=self.get_object()
+        if request.user.role.name.lower()!='moderator':
+            return Response({'detail':'Only moderators can reject documents.'},status=403)
+        document.status=Document.Status.REJECTED
+        document.save()
+        return Response({'detail':'Document rejected.'})
