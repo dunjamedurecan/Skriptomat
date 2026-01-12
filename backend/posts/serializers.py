@@ -19,7 +19,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Document
-        fields = ["id", "title", "post", "file", "uploaded_at", "user", "total_likes", "liked"]
+        fields = ["id", "title", "post", "file", "uploaded_at", "user", "total_likes", "liked","status"]
 
     def get_liked(self, obj):
         # Provjera je li trenutni korisnik lajkao objavu

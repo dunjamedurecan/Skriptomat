@@ -6,6 +6,7 @@ from posts.serializers import DocumentSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset=Document.objects.all().order_by("-uploaded_at")
     serializer_class=DocumentSerializer
@@ -27,3 +28,13 @@ class DocumentViewSet(viewsets.ModelViewSet):
             document.likes.add(user)
             liked=True
         return Response({'liked': liked, 'total_likes': document.total_likes()})
+
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class=DocumentSerializer
+    permission_classes=[permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user=self.request.user
+        if user.role and user.role.name.lower()=='moderator':
+            return Document.objects.filter(status=Document.Status.PENDING).order_by("-uploaded_at")
+        return Document.objects.filter(status=Document.Status.APPROVED)

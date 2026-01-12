@@ -77,4 +77,10 @@ export const documentsAPI = {
   },
 };
 
+export const documentFeedAPI={
+  getAll: async () => {
+    const response = await apiClient.get('/posts/documents-feed/');
+    return response.data;
+  }
+}
 export default authAPI;

@@ -10,6 +10,11 @@ def validate_pdf(file):
         raise ValidationError("File too large (max 5 MB).")
 
 class Document(models.Model):
+    class Status(models.TextChoices):
+        PENDING='pending','Pending',
+        APPROVED='approved','Approved',
+        REJECTED='rejected','Rejected',
+    
     post = models.CharField(max_length=200,blank=True)
     title = models.CharField(max_length=200, blank=True)
     file = models.FileField(upload_to="pdfs/", validators=[validate_pdf])
@@ -21,6 +26,7 @@ class Document(models.Model):
         null=True
     )
     likes=models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_documents',blank=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
 
     def total_likes(self):
         return self.likes.count()

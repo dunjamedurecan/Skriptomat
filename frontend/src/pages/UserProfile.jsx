@@ -9,6 +9,7 @@ import feedstyles from '../styles/Feed.module.css';
 export default function UserProfile() {
   const { user, logout } = useAuth(); // Dohvatanje korisničkih podataka i funkcije za odjavu
   const [posts, setPosts] = useState([]); // Stanje za prikaz objava
+  const [waitposts, setWaitposts] = useState([]); // Stanje za prikaz objava koje čekaju odobrenje
   const [loading, setLoading] = useState(true); // Prikaz učitavanja
   const [paypalEmail, setPaypalEmail] = useState(''); // PayPal email za donacije
   const [paypalSaving, setPaypalSaving] = useState(false);
@@ -38,8 +39,10 @@ export default function UserProfile() {
       }
       console.log(user);
       const data = await documentsAPI.getAll(); // Povlačenje svih objava
-      const userPosts = data.filter((post) => post.user?.username === user.username || post.user === user.username); // Filtriranje po korisničkom imenu
+      const userPosts = data.filter((post) => (post.user?.username === user.username || post.user === user.username)&& post.status === "approved"); // Filtriranje po korisničkom imenu
       setPosts(userPosts); // Postavljanje u stanje
+      const waitingPosts = data.filter((post) => (post.user?.username === user.username || post.user === user.username)&& post.status === "pending");
+      setWaitposts(waitingPosts);
     } catch (err) {
       console.error('Greška pri dohvaćanju objava:', err);
     } finally {
@@ -119,6 +122,7 @@ export default function UserProfile() {
         {/* Sekcija sa korisničkim objavama */}
         <div className={styles.profilePosts}>
           <h2>Moje objave</h2>
+          <h3>Odobrene objave</h3>
           {loading ? (
             <p>Učitavanje objava...</p>
           ) : posts.length === 0 ? (
@@ -126,6 +130,24 @@ export default function UserProfile() {
           ) : (
             <div className={feedstyles.postsList}>
             {posts.map((post) => (
+              <div key={post.id} className={feedstyles.postItem}>
+                <h3>{post.title}</h3>
+                <p>{post.post}</p>
+                {post.file && (
+                  <p>
+                    <a href={post.file} target="_blank" rel="noreferrer">
+                      Preuzmi PDF
+                    </a>
+                  </p>
+                )}
+              </div>
+            ))}
+            </div>
+          )}
+          {waitposts.length>0 && <h3>Objave na čekanju odobrenja</h3>}
+          {loading ?(<p>Učitavanje objava...</p>) : waitposts.length === 0 ? (null):(
+            <div className={feedstyles.postsList}>
+            {waitposts.map((post) => (
               <div key={post.id} className={feedstyles.postItem}>
                 <h3>{post.title}</h3>
                 <p>{post.post}</p>

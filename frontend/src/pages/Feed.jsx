@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
-import { documentsAPI } from '../api/auth';
+import { documentsAPI,documentFeedAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
@@ -32,7 +32,7 @@ export default function Feed() {
 
   const fetchPosts = async () => {
     try {
-      const data = await documentsAPI.getAll();
+      const data = await documentFeedAPI.getAll();
       const sortedPosts=data.sort((a,b)=>b.total_likes - a.total_likes);
       console.log("Api response",data); //prilikom učitavanja objave se sortiraju po broju lajkova
       setPosts(sortedPosts);
