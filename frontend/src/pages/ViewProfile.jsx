@@ -40,11 +40,11 @@ export default function ViewProfile() {
          console.warn('Korisnik nije pronađen. Preskačem dohvaćanje objava.');
          return;
        }
-         console.log(user);
-         const data = await documentsAPI.getAll(); // Povlačenje svih objava
-         const userPosts = user
-     ? data.filter((post) => post.user === user.username)
-     : [];
+         console.log("Korisnik:",user);
+         const data = await documentsAPI.getAll();
+         console.log(data); // Povlačenje svih objava
+         const userPosts = data.filter((post) => post.user?.username === user.username);
+         console.log(userPosts);
          setPosts(userPosts); // Postavljanje u stanje
        } catch (err) {
          console.error('Greška pri dohvaćanju objava:', err);
