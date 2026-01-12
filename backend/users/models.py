@@ -62,6 +62,15 @@ class User(AbstractUser):
         blank=True,
         related_name='users'
     )
+    
+    # PayPal email for receiving donations (Buy Me a Coffee feature)
+    # Users who set this can receive tips on their posts
+    paypal_email = models.EmailField(
+        blank=True,
+        null=True,
+        help_text="PayPal email for receiving donations. Leave blank to disable tips on your posts."
+    )
+    
     # Login with email instead of username
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # Required when creating superuser

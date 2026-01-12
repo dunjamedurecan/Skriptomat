@@ -258,6 +258,15 @@
   margin-top: 1rem;
 }
 
+.postActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(99, 102, 241, 0.15);
+}
+
 .likedBtn, .likeBtn{
   border: none;
   background: transparent;

@@ -1,0 +1,340 @@
+/* Buy Me a Coffee Button and Modal Styles */
+
+.coffeeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #ff813f 0%, #ff5f1f 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 95, 31, 0.3);
+}
+
+.coffeeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 95, 31, 0.4);
+  background: linear-gradient(135deg, #ff9a5f 0%, #ff813f 100%);
+}
+
+.coffeeIcon {
+  font-size: 1rem;
+}
+
+.coffeeText {
+  white-space: nowrap;
+}
+
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: linear-gradient(145deg, #1e1e2e 0%, #2a2a3e 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #fff;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.modalCoffeeIcon {
+  font-size: 2rem;
+  color: #ff813f;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.modalDescription {
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Amount Selection */
+.amountSection {
+  margin-bottom: 1.5rem;
+}
+
+.amountSection label {
+  display: block;
+  color: #ccc;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.amountButtons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.amountButton {
+  flex: 1;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.amountButton:hover {
+  background: rgba(255, 129, 63, 0.1);
+  border-color: rgba(255, 129, 63, 0.3);
+}
+
+.amountButtonActive {
+  background: rgba(255, 129, 63, 0.2);
+  border-color: #ff813f;
+  color: #ff813f;
+}
+
+/* Custom Amount Input */
+.customAmountWrapper {
+  margin-top: 1rem;
+}
+
+.customAmountWrapper label {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.customAmountInput {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  transition: border-color 0.2s;
+}
+
+.customAmountInput:focus-within {
+  border-color: #ff813f;
+}
+
+.currencySymbol {
+  color: #888;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.customAmountInput input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+}
+
+.customAmountInput input::placeholder {
+  color: #555;
+}
+
+.inputActive {
+  color: #ff813f !important;
+}
+
+/* Total Section */
+.totalSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(255, 129, 63, 0.1);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.totalSection span {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.totalAmount {
+  color: #ff813f !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+/* Donate Button */
+.donateButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #ff813f 0%, #ff5f1f 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(255, 95, 31, 0.4);
+}
+
+.donateButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 95, 31, 0.5);
+}
+
+.donateButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.disclaimer {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.75rem;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* PayPal Button Container */
+.paypalButtonContainer {
+  margin: 1.5rem 0;
+  min-height: 45px;
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Error Message */
+.errorMessage {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Success Message */
+.successMessage {
+  text-align: center;
+  padding: 2rem;
+  animation: successFadeIn 0.5s ease;
+}
+
+.successMessage h4 {
+  color: #4ade80;
+  font-size: 1.5rem;
+  margin: 0 0 1rem 0;
+}
+
+.successMessage p {
+  color: #aaa;
+  font-size: 1rem;
+}
+
+@keyframes successFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .modal {
+    padding: 1.5rem;
+  }
+
+  .amountButtons {
+    flex-wrap: wrap;
+  }
+
+  .amountButton {
+    flex: 1 1 calc(50% - 0.25rem);
+  }
+
+  .coffeeText {
+    display: none;
+  }
+
+  .coffeeButton {
+    padding: 0.5rem 0.75rem;
+  }
+}
