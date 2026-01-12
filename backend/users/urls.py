@@ -6,7 +6,8 @@ from .views import (
     GoogleLoginView, 
     GoogleRegisterView,
     CurrentUserView,
-    PublicUserProfileView
+    PublicUserProfileView,
+    UserProfileView
 )
 
 urlpatterns = [
@@ -18,4 +19,6 @@ urlpatterns = [
     # User profile endpoints for Buy Me a Coffee feature
     path('me/', CurrentUserView.as_view(), name='current_user'),
     path('profile/<int:user_id>/', PublicUserProfileView.as_view(), name='public_profile'),
+    # User profile view by username (from develop)
+    path('profile/<str:username>/', UserProfileView.as_view(), name='user_profile'),
 ]

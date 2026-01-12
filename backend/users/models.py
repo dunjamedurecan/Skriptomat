@@ -89,4 +89,7 @@ class User(AbstractUser):
     
     def is_admin(self):
         return self.role and self.role.name.lower()=='admin'
+    
+    def get_username(self):
+        return self.username
 

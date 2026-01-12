@@ -15,9 +15,11 @@ export default function UserProfile() {
   const [paypalMessage, setPaypalMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    fetchUserPosts(); // Povlačenje korisničkih objava prilikom učitavanja
-    fetchUserProfile(); // Dohvati profil za PayPal email
-  }, []);
+    if (user) {
+      fetchUserPosts(); // Povlačenje korisničkih objava prilikom učitavanja
+      fetchUserProfile(); // Dohvati profil za PayPal email
+    }
+  }, [user]);
 
   const fetchUserProfile = async () => {
     try {
@@ -30,6 +32,11 @@ export default function UserProfile() {
 
   const fetchUserPosts = async () => {
     try {
+      if (!user) {
+        console.warn('Korisnik nije prijavljen. Preskačem dohvaćanje objava.');
+        return;
+      }
+      console.log(user);
       const data = await documentsAPI.getAll(); // Povlačenje svih objava
       const userPosts = data.filter((post) => post.user?.username === user.username || post.user === user.username); // Filtriranje po korisničkom imenu
       setPosts(userPosts); // Postavljanje u stanje
@@ -56,6 +63,16 @@ export default function UserProfile() {
     }
   };
 
+  const roleNameMap = {
+    1: 'Student',
+    2: 'Moderator',
+    3: 'Administrator',
+  };
+
+  if (!user) {
+    return <p>Učitavanje korisničkih podataka...</p>;
+  }
+
   return (
     <div className={commonStyles.container}>
       <header>
@@ -72,8 +89,9 @@ export default function UserProfile() {
         <div className={styles.profileDetails}>
           <h2>Korisničko ime: {user.username}</h2>
           <p>Email: {user.email}</p>
+          <p>Tip korisnika: {roleNameMap[user.role]}</p>
           <p>Broj objava: {posts.length}</p>
-          
+
           {/* PayPal Email Settings */}
           <div className={styles.paypalSection}>
             <h3>☕ Donacije postavke</h3>
@@ -112,8 +130,9 @@ export default function UserProfile() {
           ) : posts.length === 0 ? (
             <p>Nemate objava.</p>
           ) : (
-            posts.map((post) => (
-              <div key={post.id} className={styles.postItem}>
+            <div className={feedstyles.postsList}>
+            {posts.map((post) => (
+              <div key={post.id} className={feedstyles.postItem}>
                 <h3>{post.title}</h3>
                 <p>{post.post}</p>
                 {post.file && (
@@ -124,7 +143,8 @@ export default function UserProfile() {
                   </p>
                 )}
               </div>
-            ))
+            ))}
+            </div>
           )}
         </div>
       </main>

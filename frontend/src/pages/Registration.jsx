@@ -21,6 +21,7 @@ export default function Registration(){
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [step, setStep]=useState(1);
+    const[usinggoogle,setUsingGoogle]=useState(false);
     const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
     // Email validation
@@ -204,6 +205,7 @@ export default function Registration(){
                     });
                     console.log("Postavljeni podaci nakon Google registracije,:",formData);
                     setStep(2);
+                    setUsingGoogle(true);
                 } catch (err) {
                     console.error('Google login error:', err);
                     setError(err.response?.data?.error || 'Greška pri Google prijavi');
@@ -277,6 +279,30 @@ export default function Registration(){
                                 />
                             </div>
                         </div>
+                        {usinggoogle ? (<div className={regStyles.inputRow}>
+                            <div className={styles.formGroup}>
+                                <label>Lozinka za prijavu putem maila</label>
+                                <input
+                                    type='password'
+                                    name='password'
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    placeholder='••••••••'
+                                    required
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label>Ponovi lozinku</label>
+                                <input
+                                    type='password'
+                                    name='password_confirm'
+                                    value={formData.password_confirm}
+                                    onChange={handleChange}
+                                    placeholder='••••••••'
+                                    required
+                                />
+                            </div>
+                        </div>):null}
                         <div className={regStyles.inputRow}>
                         <div className={regStyles.formGroup}>
                             <label>Ime (opcionalno)</label>
