@@ -31,22 +31,35 @@ class RegisterView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
        data = request.data
+       print("🔍 DEBUGGING REGISTRATION:")
+       print(f"Received data: {data}")
+       
        role_name = data.get("role")
+       print(f"Role name: {role_name}")
        if role_name and not Role.objects.filter(name=role_name).exists():
+            print(f"❌ Role '{role_name}' does not exist!")
             return Response({"role": ["Role does not exist."]}, status=status.HTTP_400_BAD_REQUEST)
+            
        faculty_name = data.get("faculty")
+       print(f"Faculty name: {faculty_name}")
        if faculty_name and not Faculty.objects.filter(name=faculty_name).exists():
+            print(f"❌ Faculty '{faculty_name}' does not exist!")
+            available_faculties = list(Faculty.objects.values_list('name', flat=True))
+            print(f"Available faculties: {available_faculties}")
             return Response({"faculty": ["Faculty does not exist."]}, status=status.HTTP_400_BAD_REQUEST)
+            
        print("Podaci iz zahteva:", request.data)
        serializer = self.get_serializer(data=request.data)
        if serializer.is_valid():
-            print("Validirani podaci u serializeru:", serializer.validated_data)
+            print("✅ Validirani podaci u serializeru:", serializer.validated_data)
             user = serializer.save()
             user_data = UserSerializer(user).data
             return Response(
                 {"message": "Registration successful! Please login.", "user": user_data},
                 status=status.HTTP_201_CREATED,
             )
+       else:
+            print("❌ Serializer errors:", serializer.errors)
        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
