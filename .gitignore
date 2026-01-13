@@ -41,6 +41,7 @@ yarn-error.log*
 .env                    # Local overrides (ignored)
 .env.local             # Local secrets (ignored)
 .env.*.local           # Local environment-specific (ignored)
+backend/.env
 secrets.json
 backend/.env
 
