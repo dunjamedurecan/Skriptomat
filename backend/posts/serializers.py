@@ -19,7 +19,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Document
-        fields = ["id", "title", "post", "file", "uploaded_at", "user", "total_likes", "liked","status"]
+        fields = ["id", "title", "post", "file", "uploaded_at", "user", "total_likes", "liked","status","course"]
 
     def get_liked(self, obj):
         # Provjera je li trenutni korisnik lajkao objavu
@@ -27,3 +27,4 @@ class DocumentSerializer(serializers.ModelSerializer):
         if user.is_authenticated:
             return obj.likes.filter(id=user.id).exists()
         return False
+

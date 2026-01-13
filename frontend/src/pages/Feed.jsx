@@ -23,6 +23,7 @@ export default function Feed() {
   // PDF-upload
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
+  const [course, setCourse] = useState('');
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
 
@@ -98,7 +99,7 @@ export default function Feed() {
     formData.append('post', newPost);
     if (title.trim()) formData.append('title', title);
     if (file) formData.append('file', file, file.name);
-
+    if (course.trim()) formData.append('course', course);
     try {
       setUploading(true);
       setMessage('');
@@ -110,6 +111,7 @@ export default function Feed() {
       setPosts((prev) => [savedPost, ...prev]);
       setNewPost('');
       setTitle('');
+      setCourse('');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setShowModal(false);
@@ -186,6 +188,8 @@ export default function Feed() {
                     onChange={(e)=>setTitle(e.target.value)}
                     placeholder='Unesi naslov dokumenta'
                   ></textarea>
+
+                  <textarea value={course} onChange={(e)=>setCourse(e.target.value)} placeholder='Unesi kolegij'></textarea>
                   
                   <h4>Priloži PDF</h4>
 
