@@ -173,7 +173,7 @@ export default function Feed() {
       setMessage('Greška pri odbijanju objave.');
     }
   };
-
+//treba jos dodat kod ovog gumba za sortiranje po datumu ko izbornik s kojim se biraju objave s tog i tog fakulteta u tom i tom semestru
   return (
     <div className={commonStyles.container}>
       <header>
@@ -185,6 +185,10 @@ export default function Feed() {
       </header>
 
       <main className={styles.feedMain}>
+        {posts.length > 0 &&
+        <div>
+          <button onClick={handleSortByYear} className={styles.openModalBtn}>Sortiraj po datumu</button>
+        </div>} 
         <div className={styles.feedCard}>
           <button className={styles.openModalBtn} onClick={() => setShowModal(true)}>Nova objava</button>
 
@@ -239,7 +243,7 @@ export default function Feed() {
               </div>
             </div>
           )}
-
+          
           <div className={styles.postsList}>
             {posts.length === 0 ? (
               <p className={styles.noPosts}>Još nema objava.</p>
