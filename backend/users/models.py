@@ -22,18 +22,27 @@ class Role(models.Model):
         db_table = 'roles'
 
 class Faculty(models.Model):
-    FER='Fakultet elektrotehnike i računarstva'
-
-    FACULTY_CHOICES=[
-        (FER,'Fakultet elektrotehnike i računarstva'),
-    ]
-    name=models.CharField(max_length=255,choices=FACULTY_CHOICES,unique=True)
+   
+    name=models.CharField(max_length=255,unique=True)
 
     def __str__(self):
         return self.name
     
     class Meta:
         db_table = 'faculties'
+
+class Course(models.Model):
+    name=models.CharField(max_length=255)
+    faculty=models.ForeignKey(
+        Faculty,
+        on_delete=models.CASCADE,
+        related_name='courses'
+    )
+    semester=models.IntegerField()
+    def __str__(self):
+        return f"{self.name} ({self.faculty.name}, Semestar {self.semester})"
+    class Meta:
+        db_table = 'courses'
 
 class User(AbstractUser):
     """Custom User model extending Django's built-in authentication"""

@@ -58,10 +58,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate_faculty(self, value):
         """Ako je faculty string, traži odgovarajući ID u bazi."""
         if isinstance(value, str):
-            faculty = Faculty.objects.filter(name=value).first()  # Traži po nazivu
-            if not faculty:
-                raise serializers.ValidationError(f"Faculty '{value}' does not exist.")
-            return faculty  # Vraćanje ID-a
+            faculty, created = Faculty.objects.get_or_create(name=value.strip())
+            return faculty  
         return value
    
     

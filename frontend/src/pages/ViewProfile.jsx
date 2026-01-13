@@ -43,7 +43,7 @@ export default function ViewProfile() {
          console.log("Korisnik:",user);
          const data = await documentsAPI.getAll();
          console.log(data); // Povlačenje svih objava
-         const userPosts = data.filter((post) => post.user?.username === user.username);
+         const userPosts = data.filter((post) => post.user?.username === user.username && post.status === "approved");
          console.log(userPosts);
          setPosts(userPosts); // Postavljanje u stanje
        } catch (err) {

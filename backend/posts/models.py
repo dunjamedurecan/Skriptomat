@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from backend import settings
+from users.models import Course
 
 def validate_pdf(file):
     if file.content_type != "application/pdf":
@@ -27,6 +28,13 @@ class Document(models.Model):
     )
     likes=models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_documents',blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    course=models.ForeignKey(
+        Course,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='documents'
+    )
 
     def total_likes(self):
         return self.likes.count()

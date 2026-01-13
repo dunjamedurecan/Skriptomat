@@ -238,8 +238,8 @@ export default function Feed() {
                       {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
                       <p>{post.total_likes}</p>
                     </button>):(
-                      <><button onClick={()=>handleApprove(post.id)}>Approve</button>
-                    <button onClick={()=>handleDecline(post.id)}>Decline</button></>)
+                      <><button className={styles.openModalBtn} onClick={()=>handleApprove(post.id)}>Odobri</button>
+                    <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button></>)
                     }
                     
                     
