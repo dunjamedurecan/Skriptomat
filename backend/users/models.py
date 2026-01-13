@@ -43,6 +43,7 @@ class Course(models.Model):
         return f"{self.name} ({self.faculty.name}, Semestar {self.semester})"
     class Meta:
         db_table = 'courses'
+        unique_together = [['faculty', 'name']]
 
 class User(AbstractUser):
     """Custom User model extending Django's built-in authentication"""

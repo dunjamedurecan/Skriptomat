@@ -13,6 +13,11 @@ class DocumentViewSet(viewsets.ModelViewSet):
     permission_classes=[permissions.IsAuthenticated]
     parser_classes=[MultiPartParser,FormParser]
 
+    def get_serializer_context(self):
+       context=super().get_serializer_context()
+       context['request']=self.request
+       return context
+
     def perform_create(self, serializer):
         # Automatski postavlja prijavljenog korisnika kao vlasnika dokumenta
         serializer.save(user=self.request.user)
@@ -34,10 +39,17 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes=[permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user=self.request.user
-        if user.role and user.role.name.lower()=='moderator':
-            return Document.objects.filter(status=Document.Status.PENDING).order_by("-uploaded_at")
-        return Document.objects.filter(status=Document.Status.APPROVED)
+        user = self.request.user
+    
+        if user.role and user.role.name.lower() == 'moderator':
+            queryset = Document.objects.filter(status=Document.Status.PENDING)
+        
+        # Filtriranje po fakultetu moderatora
+            if user.faculty:
+                queryset = queryset.filter(course__faculty=user.faculty)
+            return queryset.order_by("-uploaded_at")
+        queryset = Document.objects.filter(status=Document.Status.APPROVED)
+        return queryset.order_by("-uploaded_at")
     
     @action(detail=True, methods=['post'])
     def approve(self,request,pk=None):

@@ -42,11 +42,7 @@ class RegisterView(generics.CreateAPIView):
             
        faculty_name = data.get("faculty")
        print(f"Faculty name: {faculty_name}")
-       if faculty_name and not Faculty.objects.filter(name=faculty_name).exists():
-            print(f"❌ Faculty '{faculty_name}' does not exist!")
-            available_faculties = list(Faculty.objects.values_list('name', flat=True))
-            print(f"Available faculties: {available_faculties}")
-            return Response({"faculty": ["Faculty does not exist."]}, status=status.HTTP_400_BAD_REQUEST)
+      
             
        print("Podaci iz zahteva:", request.data)
        serializer = self.get_serializer(data=request.data)

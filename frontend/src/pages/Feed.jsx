@@ -21,7 +21,8 @@ export default function Feed() {
   // PDF-upload
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
-  const [course, setCourse] = useState('');
+  const [courseName, setCourseName] = useState('');
+  const [semester, setSemester] = useState('');
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
 
@@ -63,8 +64,10 @@ export default function Feed() {
     }
   };
 
-  const handleSortbyYear=async()=>{
-    const sortedPosts=[...posts].sort((a,b)=>b.uploaded_at - a.uploaded_at);
+   const handleSortByYear = async () => {
+    const sortedPosts = [...posts].sort((a, b) => 
+      new Date(b.uploaded_at) - new Date(a.uploaded_at)
+    );
     setPosts(sortedPosts);
   };
 
@@ -98,11 +101,22 @@ export default function Feed() {
       return alert('Unesi sadržaj objave ili priloži PDF.');
     }
 
+      if (courseName. trim() && ! semester. trim()) {
+      setMessage('Unesite semestar za kolegij.');
+      return;
+    }
+
+     if (semester.trim() && !courseName.trim()) {
+      setMessage('Unesite naziv kolegija.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('post', newPost);
     if (title.trim()) formData.append('title', title);
     if (file) formData.append('file', file, file.name);
-    if (course.trim()) formData.append('course', course);
+    if (courseName.trim()) formData.append('course_name', courseName);
+    if (semester.trim()) formData.append('semester', semester);
     try {
       setUploading(true);
       setMessage('');
@@ -114,7 +128,8 @@ export default function Feed() {
       setPosts((prev) => [savedPost, ...prev]);
       setNewPost('');
       setTitle('');
-      setCourse('');
+      setCourseName('');
+      setSemester('');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setShowModal(false);
@@ -192,8 +207,10 @@ export default function Feed() {
                     placeholder='Unesi naslov dokumenta'
                   ></textarea>
 
-                  <textarea value={course} onChange={(e)=>setCourse(e.target.value)} placeholder='Unesi kolegij'></textarea>
+                  <textarea value={courseName} onChange={(e)=>setCourseName(e.target.value)} placeholder='Unesi kolegij'></textarea>
                   
+                  <textarea value={semester} onChange={(e)=>setSemester(e.target.value)} placeholder='Unesi semestar' min="1" max="10"></textarea>
+
                   <h4>Priloži PDF</h4>
 
                   <input
@@ -233,6 +250,7 @@ export default function Feed() {
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                   <p>{post.title}</p>
                   <p>{post.post}</p>
+                  
                   
                   {post.file && (
                     <p>
