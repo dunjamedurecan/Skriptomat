@@ -8,8 +8,6 @@ import ProfileHover from './ProfileHover';
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
 
-//dodaj odobravanje objava za moderatora
-
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Feed() {
@@ -63,6 +61,11 @@ export default function Feed() {
     }catch(err){
       console.error('handleLike error',err);
     }
+  };
+
+  const handleSortbyYear=async()=>{
+    const sortedPosts=[...posts].sort((a,b)=>b.uploaded_at - a.uploaded_at);
+    setPosts(sortedPosts);
   };
 
   function onFileChange(e) {
