@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from tomlkit import document
 from posts.models import Document
-from users.models import Course
+from users.models import Course, User
+
 
 
 class DocumentUserSerializer(serializers.Serializer):
@@ -11,6 +12,11 @@ class DocumentUserSerializer(serializers.Serializer):
     first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
     paypal_email = serializers.EmailField(read_only=True)
+
+class ReviewedBySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 class CourseSerializer(serializers.ModelSerializer):
     """Serializer for Course data"""
@@ -28,10 +34,12 @@ class DocumentSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
     course_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     semester = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    reviewed_by = ReviewedBySerializer(read_only=True)
+    reviewed_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Document
-        fields = ["id", "title", "post", "file", "uploaded_at", "user", "total_likes", "liked","status","course","course_name","semester"]
+        fields = ["id", "title", "post", "file", "uploaded_at", "user", "total_likes", "liked","status","course","course_name","semester","reviewed_by","reviewed_at"]
         extra_kwargs = {
             'course':{'read_only': True}
         }

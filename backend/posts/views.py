@@ -5,6 +5,7 @@ from posts.models import Document
 from posts.serializers import DocumentSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils import timezone
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
@@ -44,6 +45,13 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+
+        queryset = Document.objects.select_related(
+        'user',
+        'reviewed_by',
+        'course',
+        'course__faculty'
+    )
     
         if user.role and user.role.name.lower() == 'moderator':
             queryset = Document.objects.filter(status=Document.Status.PENDING)
@@ -61,6 +69,8 @@ class PostViewSet(viewsets.ModelViewSet):
         if request.user.role.name.lower()!='moderator':
             return Response({'detail':'Only moderators can approve documents.'},status=403)
         document.status=Document.Status.APPROVED
+        document.reviewed_by=request.user
+        document.reviewed_at=timezone.now()
         document.save()
         return Response({'detail':'Document approved.'})
     
@@ -70,5 +80,7 @@ class PostViewSet(viewsets.ModelViewSet):
         if request.user.role.name.lower()!='moderator':
             return Response({'detail':'Only moderators can reject documents.'},status=403)
         document.status=Document.Status.REJECTED
+        document.reviewed_by=request.user
+        document.reviewed_at=timezone.now()
         document.save()
         return Response({'detail':'Document rejected.'})

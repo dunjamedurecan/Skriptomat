@@ -265,6 +265,12 @@ export default function Feed() {
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
                     </p>
                   )}
+
+                  {post.reviewed_by && (
+                     <p style={{ fontSize: '0.85rem', opacity: 0.75 }}>
+                     <p>Odobrio: <ProfileHover user={post.reviewed_by || 'Nepoznato'} /></p>
+                    </p>
+                  )}
                   
                   <div className={styles.postActions}>
                     {user.role==='student' ? (<button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
