@@ -37,6 +37,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class=DocumentSerializer
     permission_classes=[permissions.IsAuthenticated]
+    parser_classes=[MultiPartParser,FormParser]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     def get_queryset(self):
         user = self.request.user

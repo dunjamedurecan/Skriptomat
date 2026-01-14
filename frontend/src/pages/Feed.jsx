@@ -38,6 +38,7 @@ export default function Feed() {
       const sortedPosts=data.sort((a,b)=>b.total_likes - a.total_likes);
       console.log("Api response",data); //prilikom učitavanja objave se sortiraju po broju lajkova
       setPosts(sortedPosts);
+      console.log(posts);
     } catch (err) {
       console.error('fetchPosts error', err);
       
@@ -254,6 +255,9 @@ export default function Feed() {
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                   <p>{post.title}</p>
                   <p>{post.post}</p>
+                  <p>📚 {post.course?.name}</p>
+                  <p>🧠 Sem {post.course?.semester}</p>
+                  <p>🏛️ {post.course?.faculty_name}</p>
                   
                   
                   {post.file && (
