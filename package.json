@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "axios": "^1.13.2",
-    "stream-chat": "^9.28.0"
+    "axios": "^1.13.2"
   }
 }
