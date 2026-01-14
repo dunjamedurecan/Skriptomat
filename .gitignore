@@ -38,9 +38,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment & secrets
-.env                    # Local overrides (ignored)
-.env.local             # Local secrets (ignored)
-.env.*.local           # Local environment-specific (ignored)
+.env
+.env.local
+.env.*.local
+backend/.env
 secrets.json
 
 # Keep environment templates in Git:
