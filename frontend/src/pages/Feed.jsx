@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ import { documentsAPI } from '../api/auth';
 export default function Feed() {
 
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
@@ -178,14 +179,22 @@ export default function Feed() {
             ) : (
               posts.map((post) => (
                 <div key={post.id} className={styles.postItem}>
-                  <p>{post.title}</p>
-                  <p>{post.post}</p>
-                  {post.file && (
-                    <p>
-                      <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
-                    </p>
-                  )}
-                  <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
+                  <div className={styles.postContent}>
+                    <p><strong>{post.title}</strong></p>
+                    <p>{post.post}</p>
+                    {post.file && (
+                      <p>
+                        <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
+                      </p>
+                    )}
+                    <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
+                  </div>
+                  <button 
+                    className={styles.chatButton} 
+                    onClick={() => navigate(`/document/${post.id}`)}
+                  >
+                    💬 Čavrljanje
+                  </button>
                 </div>
               ))
             )}
@@ -194,4 +203,5 @@ export default function Feed() {
       </main>
     </div>
   );
+ 
 }
