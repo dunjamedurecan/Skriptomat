@@ -32,6 +32,27 @@ export const authAPI = {
   }
 };
 
+// User Profile API functions (for Buy Me a Coffee feature)
+export const userAPI = {
+  // Get current user's profile
+  getMe: async () => {
+    const response = await apiClient.get('/users/me/');
+    return response.data;
+  },
+  
+  // Update current user's profile (including PayPal email)
+  updateMe: async (data) => {
+    const response = await apiClient.patch('/users/me/', data);
+    return response.data;
+  },
+  
+  // Get public profile of any user (to check if they accept donations)
+  getPublicProfile: async (userId) => {
+    const response = await apiClient.get(`/users/profile/${userId}/`);
+    return response.data;
+  },
+};
+
 // Document API functions
 export const documentsAPI = {
   // Get all documents
@@ -54,6 +75,22 @@ export const documentsAPI = {
     const response=await apiClient.post(`/posts/documents/${id}/like/`);
     return response.data;
   },
+
+  
 };
 
+export const documentFeedAPI={
+  getAll: async () => {
+    const response = await apiClient.get('/posts/documents-feed/');
+    return response.data;
+  },
+  approve: async(id)=>{
+    const response=await apiClient.post(`/posts/documents-feed/${id}/approve/`);
+    return response.data;
+  },
+  decline: async(id)=>{
+    const response=await apiClient.post(`/posts/documents-feed/${id}/decline/`);
+    return response.data;
+  }
+}
 export default authAPI;

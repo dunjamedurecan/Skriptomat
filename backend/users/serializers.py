@@ -58,10 +58,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate_faculty(self, value):
         """Ako je faculty string, traži odgovarajući ID u bazi."""
         if isinstance(value, str):
-            faculty = Faculty.objects.filter(name=value).first()  # Traži po nazivu
-            if not faculty:
-                raise serializers.ValidationError(f"Faculty '{value}' does not exist.")
-            return faculty  # Vraćanje ID-a
+            faculty, created = Faculty.objects.get_or_create(name=value.strip())
+            return faculty  
         return value
    
     
@@ -99,5 +97,39 @@ class UserSerializer(serializers.ModelSerializer):
     faculty=serializers.StringRelatedField()
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined','role','faculty']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined', 'role', 'faculty', 'paypal_email']
         read_only_fields = ['id', 'date_joined']
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating user profile settings.
+    Allows users to update their PayPal email for receiving donations.
+    """
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'paypal_email']
+    
+    def validate_paypal_email(self, value):
+        """Validate PayPal email format (optional field)"""
+        if value and value.strip():
+            # Basic email validation is handled by EmailField
+            return value.strip().lower()
+        return None  # Allow clearing the field
+
+
+class PublicUserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for public user profile (viewed by other users).
+    Shows limited info and whether user accepts donations.
+    """
+    accepts_donations = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'date_joined', 'accepts_donations', 'paypal_email']
+        read_only_fields = fields
+    
+    def get_accepts_donations(self, obj):
+        """Returns True if user has PayPal email set"""
+        return bool(obj.paypal_email)

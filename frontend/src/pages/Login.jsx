@@ -116,8 +116,11 @@ export default function Login(){
 
         // Call backend
         setLoading(true);
+        console.log('🔐 Attempting login with:', { username: formData.username });
+        
         try {
             const response = await authAPI.login(formData);
+            console.log('✅ Login successful:', response);
 
             // Store tokens in localStorage
             login(
@@ -132,14 +135,23 @@ export default function Login(){
             navigate('/feed');
 
         } catch (err) {
-            console.error('Login error:', err);
+            console.error('❌ Login error:', err);
+            console.error('Error details:', {
+                message: err.message,
+                response: err.response?.data,
+                status: err.response?.status
+            });
 
-            if (err.response?.status === 401) {
+            if (err.code === 'ECONNABORTED') {
+                setError('Zahtjev je istekao. Provjeri da li backend radi.');
+            } else if (err.response?.status === 401) {
                 setError('Pogrešno korisničko ime ili lozinka');
             } else if (err.response?.status === 403) {
                 setError('Račun je onemogućen');
             } else if (err.response?.data?.error) {
                 setError(err.response.data.error);
+            } else if (err.message.includes('Network Error')) {
+                setError('Greška mreže - provjeri da li backend radi na localhost:8000');
             } else {
                 setError('Greška pri povezivanju sa serverom');
             }

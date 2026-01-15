@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
-import { documentsAPI } from '../api/auth';
+import { documentsAPI,documentFeedAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
+import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
 
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
@@ -20,6 +21,8 @@ export default function Feed() {
   // PDF-upload
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
+  const [courseName, setCourseName] = useState('');
+  const [semester, setSemester] = useState('');
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
 
@@ -31,10 +34,11 @@ export default function Feed() {
 
   const fetchPosts = async () => {
     try {
-      const data = await documentsAPI.getAll();
+      const data = await documentFeedAPI.getAll();
       const sortedPosts=data.sort((a,b)=>b.total_likes - a.total_likes);
       console.log("Api response",data); //prilikom učitavanja objave se sortiraju po broju lajkova
       setPosts(sortedPosts);
+      console.log(posts);
     } catch (err) {
       console.error('fetchPosts error', err);
       
@@ -59,6 +63,13 @@ export default function Feed() {
     }catch(err){
       console.error('handleLike error',err);
     }
+  };
+
+   const handleSortByYear = async () => {
+    const sortedPosts = [...posts].sort((a, b) => 
+      new Date(b.uploaded_at) - new Date(a.uploaded_at)
+    );
+    setPosts(sortedPosts);
   };
 
   function onFileChange(e) {
@@ -91,11 +102,22 @@ export default function Feed() {
       return alert('Unesi sadržaj objave ili priloži PDF.');
     }
 
+      if (courseName. trim() && ! semester. trim()) {
+      setMessage('Unesite semestar za kolegij.');
+      return;
+    }
+
+     if (semester.trim() && !courseName.trim()) {
+      setMessage('Unesite naziv kolegija.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('post', newPost);
     if (title.trim()) formData.append('title', title);
     if (file) formData.append('file', file, file.name);
-
+    if (courseName.trim()) formData.append('course_name', courseName);
+    if (semester.trim()) formData.append('semester', semester);
     try {
       setUploading(true);
       setMessage('');
@@ -107,6 +129,8 @@ export default function Feed() {
       setPosts((prev) => [savedPost, ...prev]);
       setNewPost('');
       setTitle('');
+      setCourseName('');
+      setSemester('');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setShowModal(false);
@@ -129,6 +153,28 @@ export default function Feed() {
     }
   };
 
+  const handleApprove=async(id)=>{
+    try{
+      const response=await documentFeedAPI.approve(id);
+      setMessage('Objava odobrena.');
+      setPosts(posts.filter((post)=>post.id!==id));
+    } catch(err){
+      console.error('handleApprove error', err);
+      setMessage('Greška pri odobravanju objave.');
+    }
+  };
+
+  const handleDecline=async(id)=>{
+    try{
+      const response=await documentFeedAPI.decline(id);
+      setMessage('Objava odbijena.');
+      setPosts(posts.filter((post)=>post.id!==id));
+    } catch(err){
+      console.error('handleDecline error', err);
+      setMessage('Greška pri odbijanju objave.');
+    }
+  };
+//treba jos dodat kod ovog gumba za sortiranje po datumu ko izbornik s kojim se biraju objave s tog i tog fakulteta u tom i tom semestru
   return (
     <div className={commonStyles.container}>
       <header>
@@ -140,6 +186,10 @@ export default function Feed() {
       </header>
 
       <main className={styles.feedMain}>
+        {posts.length > 0 &&
+        <div>
+          <button onClick={handleSortByYear} className={styles.openModalBtn}>Sortiraj po datumu</button>
+        </div>} 
         <div className={styles.feedCard}>
           <button className={styles.openModalBtn} onClick={() => setShowModal(true)}>Nova objava</button>
 
@@ -161,7 +211,11 @@ export default function Feed() {
                     onChange={(e)=>setTitle(e.target.value)}
                     placeholder='Unesi naslov dokumenta'
                   ></textarea>
+
+                  <textarea value={courseName} onChange={(e)=>setCourseName(e.target.value)} placeholder='Unesi kolegij'></textarea>
                   
+                  <textarea value={semester} onChange={(e)=>setSemester(e.target.value)} placeholder='Unesi semestar' min="1" max="10"></textarea>
+
                   <h4>Priloži PDF</h4>
 
                   <input
@@ -190,24 +244,51 @@ export default function Feed() {
               </div>
             </div>
           )}
-
+          
           <div className={styles.postsList}>
             {posts.length === 0 ? (
               <p className={styles.noPosts}>Još nema objava.</p>
             ) : (
               posts.map((post) => (
                 <div key={post.id} className={styles.postItem}>
-                  <div><ProfileHover user={post.user || 'Nepoznato'} /></div> 
+                  <p><ProfileHover user={post.user || 'Nepoznato'} /></p>
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
                   <p>{post.title}</p>
                   <p>{post.post}</p>
+                  <p>📚 {post.course?.name}</p>
+                  <p>🧠 Sem {post.course?.semester}</p>
+                  <p>🏛️ {post.course?.faculty_name}</p>
+                  
                   
                   {post.file && (
                     <p>
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
                     </p>
                   )}
-                  <button onClick={()=>handleLike(post.id)}className={post.liked ? styles.likedBtn:styles.likeBtn}>{post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}<p>{post.total_likes}</p></button>
+
+                  {post.reviewed_by && (
+                     <p style={{ fontSize: '0.85rem', opacity: 0.75 }}>
+                     <p>Odobrio: <ProfileHover user={post.reviewed_by || 'Nepoznato'} /></p>
+                    </p>
+                  )}
+                  
+                  <div className={styles.postActions}>
+                    {user.role==='student' ? (<button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
+                      {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
+                      <p>{post.total_likes}</p>
+                    </button>):(
+                      <><button className={styles.openModalBtn} onClick={()=>handleApprove(post.id)}>Odobri</button>
+                    <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button></>)
+                    }
+                    
+                    
+                    {/* Buy Me a Coffee button - only shows if author has PayPal email */}
+                    <BuyMeACoffee 
+                      authorPaypalEmail={post.user?.paypal_email}
+                      authorName={post.user?.username || post.user?.first_name || 'autora'}
+                      postTitle={post.title}
+                    />
+                  </div>
                 </div>
               ))
             )}

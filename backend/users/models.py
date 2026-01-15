@@ -22,18 +22,28 @@ class Role(models.Model):
         db_table = 'roles'
 
 class Faculty(models.Model):
-    FER='Fakultet elektrotehnike i računarstva'
-
-    FACULTY_CHOICES=[
-        (FER,'Fakultet elektrotehnike i računarstva'),
-    ]
-    name=models.CharField(max_length=255,choices=FACULTY_CHOICES,unique=True)
+   
+    name=models.CharField(max_length=255,unique=True)
 
     def __str__(self):
         return self.name
     
     class Meta:
         db_table = 'faculties'
+
+class Course(models.Model):
+    name=models.CharField(max_length=255)
+    faculty=models.ForeignKey(
+        Faculty,
+        on_delete=models.CASCADE,
+        related_name='courses'
+    )
+    semester=models.IntegerField()
+    def __str__(self):
+        return f"{self.name} ({self.faculty.name}, Semestar {self.semester})"
+    class Meta:
+        db_table = 'courses'
+        unique_together = [['faculty', 'name']]
 
 class User(AbstractUser):
     """Custom User model extending Django's built-in authentication"""
@@ -62,6 +72,15 @@ class User(AbstractUser):
         blank=True,
         related_name='users'
     )
+    
+    # PayPal email for receiving donations (Buy Me a Coffee feature)
+    # Users who set this can receive tips on their posts
+    paypal_email = models.EmailField(
+        blank=True,
+        null=True,
+        help_text="PayPal email for receiving donations. Leave blank to disable tips on your posts."
+    )
+    
     # Login with email instead of username
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # Required when creating superuser
