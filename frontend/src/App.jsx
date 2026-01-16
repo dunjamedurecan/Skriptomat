@@ -27,6 +27,14 @@ export default function App(){
             </ProtectedRoute>
           }
         />
+         <Route
+          path="/document/:id"
+          element={
+            <ProtectedRoute>
+              <ChatPage/>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );

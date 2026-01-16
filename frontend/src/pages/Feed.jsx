@@ -5,6 +5,7 @@ import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
 import { documentsAPI,documentFeedAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
+import { Link } from "react-router-dom";
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
 
@@ -289,6 +290,12 @@ export default function Feed() {
                       authorName={post.user?.username || post.user?.first_name || 'autora'}
                       postTitle={post.title}
                     />
+                    <button 
+                    className={styles.chatButton} 
+                    onClick={() => navigate(`/document/${post.id}`)}
+                  >
+                    💬 Čavrljanje
+                  </button>
                   </div>
                 </div>
               ))
