@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,7 @@ import {FaHeart,FaRegHeart} from 'react-icons/fa';
 export default function Feed() {
 
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
@@ -294,7 +295,9 @@ export default function Feed() {
             )}
           </div>
         </div>
+        
       </main>
     </div>
   );
+ 
 }
