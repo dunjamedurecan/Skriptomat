@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,7 @@ import {FaHeart,FaRegHeart} from 'react-icons/fa';
 export default function Feed() {
 
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
@@ -253,7 +254,7 @@ export default function Feed() {
                 <div key={post.id} className={styles.postItem}>
                   <p><ProfileHover user={post.user || 'Nepoznato'} /></p>
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
-                  <p>{post.title}</p>
+                  <p><strong>{post.title}</strong></p>
                   <p>{post.post}</p>
                   <p>📚 {post.course?.name}</p>
                   <p>🧠 Sem {post.course?.semester}</p>
@@ -281,6 +282,13 @@ export default function Feed() {
                     <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button></>)
                     }
                     
+                    {/* Chat button for document discussion */}
+                    <button 
+                      className={styles.chatButton} 
+                      onClick={() => navigate(`/document/${post.id}`)}
+                    >
+                      💬 Čavrljanje
+                    </button>
                     
                     {/* Buy Me a Coffee button - only shows if author has PayPal email */}
                     <BuyMeACoffee 
@@ -294,7 +302,9 @@ export default function Feed() {
             )}
           </div>
         </div>
+        
       </main>
     </div>
   );
+ 
 }
