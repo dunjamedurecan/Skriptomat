@@ -8,7 +8,7 @@ import ProfileHover from './ProfileHover';
 import { Link } from "react-router-dom";
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
-
+import PdfViewer from '../components/PdfViewer';
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Feed() {
@@ -261,10 +261,14 @@ export default function Feed() {
                   <p>🧠 Sem {post.course?.semester}</p>
                   <p>🏛️ {post.course?.faculty_name}</p>
                   
-                  
-                  {post.file && (
+                  {post.file && post.allow_download &&(
                     <p>
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
+                    </p>
+                  ) }
+                  {post.file && (
+                    <p>
+                      <PdfViewer pdfUrl={post.file} />
                     </p>
                   )}
 
