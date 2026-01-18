@@ -4,10 +4,13 @@ from backend import settings
 from users.models import Course
 
 def validate_pdf(file):
-    if file.content_type != "application/pdf":
-        raise ValidationError("Only PDF files are allowed.")
-    max_size = 5 * 1024 * 1024  # 5 MB limit
-    if file.size > max_size:
+    # Only validate if it's a new upload (not an already-saved file)
+    if hasattr(file, 'content_type'):
+        if file.content_type != "application/pdf":
+            raise ValidationError("Only PDF files are allowed.")
+    
+    # Check file size (works for both new uploads and saved files)
+    if file.size > 5 * 1024 * 1024:  # 5 MB limit
         raise ValidationError("File too large (max 5 MB).")
 
 class Document(models.Model):
