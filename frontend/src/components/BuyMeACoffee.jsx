@@ -1,11 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaCoffee, FaTimes } from 'react-icons/fa';
 import styles from '../styles/BuyMeACoffee.module.css';
+import client from '../api/client';
 
 /**
- * Buy Me a Coffee component with PayPal JS SDK integration
+ * Buy Me a Coffee component with server-side PayPal integration
  * Shows a coffee icon button that opens PayPal donation modal when clicked.
  * Only renders if the author has a paypal_email set.
+ * 
+ * Server-side flow:
+ * 1. User selects amount and clicks PayPal button
+ * 2. Frontend calls /api/posts/paypal/create-order/ (backend creates order with PayPal API)
+ * 3. PayPal SDK opens popup with order approval
+ * 4. After approval, frontend calls /api/posts/paypal/capture-order/ (backend captures payment)
+ * 5. PayPal webhook confirms transaction (backend receives notification)
  * 
  * Props:
  * - authorPaypalEmail: PayPal email of the post author
@@ -43,7 +51,7 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
     }
 
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=EUR`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=EUR&intent=capture`;
     script.async = true;
     script.onload = () => setSdkReady(true);
     script.onerror = () => setError('Greška pri učitavanju PayPal SDK-a.');
@@ -69,33 +77,40 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
     paypalRef.current.innerHTML = '';
 
     window.paypal.Buttons({
-      createOrder: (data, actions) => {
-        return actions.order.create({
-          purchase_units: [{
-            amount: {
-              value: donationAmount.toFixed(2),
-              currency_code: 'EUR'
-            },
-            description: `Donacija za "${postTitle || 'objavu'}" - Skriptomat`,
-            payee: {
-              email_address: authorPaypalEmail
-            }
-          }]
-        });
+      createOrder: async (data, actions) => {
+        try {
+          // Call backend to create PayPal order (server-side)
+          const response = await client.post('/posts/paypal/create-order/', {
+            amount: donationAmount.toFixed(2),
+            currency: 'EUR',
+            payee_email: authorPaypalEmail,
+            description: `Donacija za "${postTitle || 'objavu'}" - Skriptomat`
+          });
+
+          if (response.data.orderID) {
+            return response.data.orderID;
+          } else {
+            throw new Error('Failed to create order');
+          }
+        } catch (err) {
+          console.error('Create order error:', err);
+          setError('Greška pri kreiranju narudžbe. Pokušaj ponovo.');
+          throw err;
+        }
       },
       onApprove: async (data, actions) => {
         try {
-          const details = await actions.order.capture();
-          console.log('Transaction completed:', details);
+          // Call backend to capture PayPal order (server-side)
+          const response = await client.post('/posts/paypal/capture-order/', {
+            orderID: data.orderID
+          });
+
+          console.log('Transaction completed:', response.data);
           setSuccess(true);
           setError('');
-          setTimeout(() => {
-            setShowModal(false);
-            setSuccess(false);
-          }, 3000);
         } catch (err) {
-          console.error('Transaction error:', err);
-          setError('Greška pri obradi transakcije.');
+          console.error('Capture error:', err);
+          setError('Greška pri obradi transakcije. Pokušaj ponovo.');
         }
       },
       onError: (err) => {
@@ -158,8 +173,8 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
       </button>
 
       {showModal && (
-        <div className={styles.modalOverlay} onClick={handleModalClose}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
             <button className={styles.closeButton} onClick={handleModalClose}>
               <FaTimes />
             </button>
@@ -173,6 +188,9 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
               <div className={styles.successMessage}>
                 <h4>✅ Hvala na donaciji!</h4>
                 <p>Tvoja podrška mnogo znači {authorName ? `za ${authorName}` : 'autoru'}.</p>
+                <button className={styles.closeSuccessButton} onClick={handleModalClose}>
+                  Zatvori
+                </button>
               </div>
             ) : (
               <>

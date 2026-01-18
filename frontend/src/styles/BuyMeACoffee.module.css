@@ -303,6 +303,26 @@
 .successMessage p {
   color: #aaa;
   font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.closeSuccessButton {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #ff813f 0%, #ff5f1f 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(255, 95, 31, 0.4);
+}
+
+.closeSuccessButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 95, 31, 0.5);
+  background: linear-gradient(135deg, #ff9a5f 0%, #ff813f 100%);
 }
 
 @keyframes successFadeIn {

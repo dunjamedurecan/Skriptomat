@@ -260,7 +260,6 @@ export default function Feed() {
                   <p>🧠 Sem {post.course?.semester}</p>
                   <p>🏛️ {post.course?.faculty_name}</p>
                   
-                  
                   {post.file && (
                     <p>
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
@@ -269,18 +268,22 @@ export default function Feed() {
 
                   {post.reviewed_by && (
                      <p style={{ fontSize: '0.85rem', opacity: 0.75 }}>
-                     <p>Odobrio: <ProfileHover user={post.reviewed_by || 'Nepoznato'} /></p>
+                       Odobrio: <ProfileHover user={post.reviewed_by || 'Nepoznato'} />
                     </p>
                   )}
                   
                   <div className={styles.postActions}>
-                    {user.role==='student' ? (<button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
-                      {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
-                      <p>{post.total_likes}</p>
-                    </button>):(
-                      <><button className={styles.openModalBtn} onClick={()=>handleApprove(post.id)}>Odobri</button>
-                    <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button></>)
-                    }
+                    {user.role==='student' ? (
+                      <button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
+                        {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
+                        <p>{post.total_likes}</p>
+                      </button>
+                    ) : (
+                      <>
+                        <button className={styles.openModalBtn} onClick={()=>handleApprove(post.id)}>Odobri</button>
+                        <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button>
+                      </>
+                    )}
                     
                     {/* Chat button for document discussion */}
                     <button 
