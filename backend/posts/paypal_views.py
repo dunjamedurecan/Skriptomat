@@ -19,7 +19,7 @@ from requests.auth import HTTPBasicAuth
 
 
 # PayPal API configuration
-PAYPAL_CLIENT_ID = os.environ.get('VITE_PAYPAL_CLIENT_ID', '')
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID', '')
 PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET', '')
 PAYPAL_MODE = os.environ.get('PAYPAL_MODE', 'sandbox')  # 'sandbox' or 'live'
 
@@ -33,6 +33,10 @@ def get_paypal_access_token():
     """
     Get OAuth2 access token from PayPal
     """
+    print(f"DEBUG: PAYPAL_CLIENT_ID = {PAYPAL_CLIENT_ID[:10]}...")
+    print(f"DEBUG: PAYPAL_CLIENT_SECRET = {PAYPAL_CLIENT_SECRET[:10] if PAYPAL_CLIENT_SECRET else 'MISSING'}...")
+    print(f"DEBUG: PAYPAL_API_BASE = {PAYPAL_API_BASE}")
+    
     auth = HTTPBasicAuth(PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET)
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -47,6 +51,9 @@ def get_paypal_access_token():
         headers=headers,
         data=data
     )
+    
+    print(f"DEBUG: PayPal token response status: {response.status_code}")
+    print(f"DEBUG: PayPal token response: {response.text[:200]}")
     
     if response.status_code == 200:
         return response.json().get('access_token')
@@ -131,6 +138,9 @@ def create_paypal_order(request):
             )
     
     except Exception as e:
+        import traceback
+        print(f"ERROR in create_paypal_order: {str(e)}")
+        print(traceback.format_exc())
         return Response(
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
