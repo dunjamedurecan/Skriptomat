@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
-import { documentsAPI,documentFeedAPI } from '../api/auth';
+import { documentsAPI, documentFeedAPI, userAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
@@ -22,8 +22,8 @@ export default function Feed() {
   // PDF-upload
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
-  const [courseName, setCourseName] = useState('');
-  const [semester, setSemester] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [courses, setCourses] = useState([]);
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
 
@@ -31,7 +31,17 @@ export default function Feed() {
 
   useEffect(() => {
     fetchPosts();
+    fetchCourses();
   }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const data = await userAPI.getCourses();
+      setCourses(data);
+    } catch (err) {
+      console.error('fetchCourses error', err);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
@@ -103,13 +113,8 @@ export default function Feed() {
       return alert('Unesi sadržaj objave ili priloži PDF.');
     }
 
-      if (courseName. trim() && ! semester. trim()) {
-      setMessage('Unesite semestar za kolegij.');
-      return;
-    }
-
-     if (semester.trim() && !courseName.trim()) {
-      setMessage('Unesite naziv kolegija.');
+    if (!selectedCourseId) {
+      setMessage('Odaberi kolegij.');
       return;
     }
 
@@ -117,8 +122,8 @@ export default function Feed() {
     formData.append('post', newPost);
     if (title.trim()) formData.append('title', title);
     if (file) formData.append('file', file, file.name);
-    if (courseName.trim()) formData.append('course_name', courseName);
-    if (semester.trim()) formData.append('semester', semester);
+    formData.append('course_id', selectedCourseId);
+    
     try {
       setUploading(true);
       setMessage('');
@@ -130,8 +135,7 @@ export default function Feed() {
       setPosts((prev) => [savedPost, ...prev]);
       setNewPost('');
       setTitle('');
-      setCourseName('');
-      setSemester('');
+      setSelectedCourseId('');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setShowModal(false);
@@ -193,58 +197,6 @@ export default function Feed() {
         </div>} 
         <div className={styles.feedCard}>
           <button className={styles.openModalBtn} onClick={() => setShowModal(true)}>Nova objava</button>
-
-          {showModal && (
-            <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-              <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <h3>Napiši novu objavu</h3>
-                <form className={styles.newPostForm} onSubmit={handleAddPost}>
-                  <textarea
-                    value={newPost}
-                    onChange={(e) => setNewPost(e.target.value)}
-                    placeholder="Unesi sadržaj objave..."
-                  ></textarea>
-
-                  <hr />
-                  
-                  <textarea 
-                    value={title} 
-                    onChange={(e)=>setTitle(e.target.value)}
-                    placeholder='Unesi naslov dokumenta'
-                  ></textarea>
-
-                  <textarea value={courseName} onChange={(e)=>setCourseName(e.target.value)} placeholder='Unesi kolegij'></textarea>
-                  
-                  <textarea value={semester} onChange={(e)=>setSemester(e.target.value)} placeholder='Unesi semestar' min="1" max="10"></textarea>
-
-                  <h4>Priloži PDF</h4>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="application/pdf"
-                    onChange={onFileChange}
-                  />
-
-                  {file && (
-                    <div style={{padding: '0.75rem', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '8px', color: '#d1d5db', fontSize: '0.9rem'}}>
-                      <small>Priloženo: {file.name} ({Math.round(file.size / 1024)} KB)</small>
-                    </div>
-                  )}
-
-                  <button type="submit" disabled={uploading}>
-                    {uploading ? 'Spremanje...' : 'Objavi'}
-                  </button>
-                  
-                  <button type="button" className={styles.closeModalBtn} onClick={() => setShowModal(false)}>
-                    Zatvori
-                  </button>
-
-                  {message && <p className={styles.message}>{message}</p>}
-                </form>
-              </div>
-            </div>
-          )}
           
           <div className={styles.postsList}>
             {posts.length === 0 ? (
@@ -273,16 +225,16 @@ export default function Feed() {
                   )}
                   
                   <div className={styles.postActions}>
-                    {user.role==='student' ? (
-                      <button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
+                    {user.role === 'moderator' && post.status === 'pending' ? (
+                      <>
+                        <button className={styles.openModalBtn} onClick={() => handleApprove(post.id)}>Odobri</button>
+                        <button className={styles.openModalBtn} onClick={() => handleDecline(post.id)}>Odbij</button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
                         {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
                         <p>{post.total_likes}</p>
                       </button>
-                    ) : (
-                      <>
-                        <button className={styles.openModalBtn} onClick={()=>handleApprove(post.id)}>Odobri</button>
-                        <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button>
-                      </>
                     )}
                     
                     {/* Chat button for document discussion */}
@@ -307,6 +259,84 @@ export default function Feed() {
         </div>
         
       </main>
+
+      {/* Modal rendered at root level for proper centering */}
+      {showModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3>Napiši novu objavu</h3>
+            <form className={styles.newPostForm} onSubmit={handleAddPost}>
+              
+              {/* Title and Post content in a row */}
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Naslov</label>
+                  <input 
+                    type="text"
+                    value={title} 
+                    onChange={(e)=>setTitle(e.target.value)}
+                    placeholder='Unesi naslov dokumenta'
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Opis</label>
+                  <input
+                    type="text"
+                    value={newPost}
+                    onChange={(e) => setNewPost(e.target.value)}
+                    placeholder="Unesi sadržaj objave..."
+                  />
+                </div>
+              </div>
+
+              {/* Course dropdown - full width */}
+              <div className={styles.formGroup}>
+                <label>Kolegij</label>
+                <select
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  required
+                >
+                  <option value="">Odaberi kolegij...</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name} - {course.faculty} (Sem {course.semester})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* File upload */}
+              <div className={styles.formGroup}>
+                <label>Priloži PDF</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={onFileChange}
+                />
+                {file && (
+                  <div className={styles.fileInfo}>
+                    <small>📄 {file.name} ({Math.round(file.size / 1024)} KB)</small>
+                  </div>
+                )}
+              </div>
+
+              {/* Action buttons */}
+              <div className={styles.formActions}>
+                <button type="submit" disabled={uploading} className={styles.submitBtn}>
+                  {uploading ? 'Spremanje...' : 'Objavi'}
+                </button>
+                <button type="button" className={styles.closeModalBtn} onClick={() => setShowModal(false)}>
+                  Zatvori
+                </button>
+              </div>
+
+              {message && <p className={styles.message}>{message}</p>}
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
  
