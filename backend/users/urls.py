@@ -7,7 +7,9 @@ from .views import (
     GoogleRegisterView,
     CurrentUserView,
     PublicUserProfileView,
-    UserProfileView
+    UserProfileView,
+    CourseListView,
+    FacultyListView
 )
 
 urlpatterns = [
@@ -21,4 +23,8 @@ urlpatterns = [
     path('profile/<int:user_id>/', PublicUserProfileView.as_view(), name='public_profile'),
     # User profile view by username (from develop)
     path('profile/<str:username>/', UserProfileView.as_view(), name='user_profile'),
+    # Courses endpoint
+    path('courses/', CourseListView.as_view(), name='courses'),
+    # Faculties endpoint
+    path('faculties/', FacultyListView.as_view(), name='faculties'),
 ]

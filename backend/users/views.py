@@ -2,7 +2,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from users.models import Faculty, Role
+from users.models import Faculty, Role, Course
 from .serializers import (
     UserRegistrationSerializer, 
     UserSerializer, 
@@ -338,3 +338,42 @@ class UserProfileView(APIView):
             return Response(serializer.data)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CourseListView(APIView):
+    """
+    GET /api/users/courses/ - Get all courses with their faculty information
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        courses = Course.objects.select_related('faculty').all()
+        data = [
+            {
+                'id': course.id,
+                'name': course.name,
+                'semester': course.semester,
+                'faculty': course.faculty.name,
+                'faculty_id': course.faculty.id,
+            }
+            for course in courses
+        ]
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class FacultyListView(APIView):
+    """
+    GET /api/users/faculties/ - Get all faculties
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        faculties = Faculty.objects.all()
+        data = [
+            {
+                'id': faculty.id,
+                'name': faculty.name,
+            }
+            for faculty in faculties
+        ]
+        return Response(data, status=status.HTTP_200_OK)
