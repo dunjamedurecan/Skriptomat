@@ -1,0 +1,38 @@
+.chatMain {
+  padding-top: 140px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.chatWrapper {
+  width: 100%;
+  max-width: 900px;
+  padding: 0 1rem;
+}
+
+.backButton {
+  background: rgba(99, 102, 241, 0.2) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  color: #a5b4fc !important;
+}
+
+.backButton:hover {
+  background: rgba(99, 102, 241, 0.3) !important;
+  border-color: #6366f1 !important;
+  color: #c7d2fe !important;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 3rem;
+  color: #d1d5db;
+  font-size: 1.2rem;
+}
+
+.error {
+  color: #fca5a5;
+}
