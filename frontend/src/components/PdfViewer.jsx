@@ -6,6 +6,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 const PdfViewer = ({ pdfUrl }) => {
   const canvasRef = useRef(null);
   const renderTaskRef = useRef(null);
+  const [numPages, setNumPages]=useState(0);
+  const[page, setPage]=useState(1);
 
   useEffect(() => {
     if (!pdfUrl) return;
@@ -13,7 +15,8 @@ const PdfViewer = ({ pdfUrl }) => {
     const loadingTask = pdfjsLib.getDocument(pdfUrl);
 
     loadingTask.promise.then(pdf => {
-      pdf. getPage(1).then(page => {
+        setNumPages(pdf.numPages);
+      pdf. getPage(page).then(page => {
         const scale = 1.5;
         const viewport = page.getViewport({ scale });
 
@@ -51,9 +54,19 @@ const PdfViewer = ({ pdfUrl }) => {
         renderTaskRef.current.cancel();
       }
     };
-  }, [pdfUrl]);
+  }, [pdfUrl, page]);
 
-  return <canvas ref={canvasRef} style={{ border: '1px solid black', width: '100%' }} />;
+return (
+    <div>
+        <canvas ref={canvasRef} style={{ border: '1px solid black', width: '100%' }} />
+  {numPages>1 &&(
+    <div>
+    <button onClick={()=>setPage(p=>Math.max(p-1,1))}>⬅</button>
+    <span>{page}/{numPages}</span>
+    <button onClick={()=>setPage(p=>Math.min(p+1,numPages))}>➡</button>
+    </div>
+  )}
+    </div>
+);
 };
-
 export default PdfViewer;

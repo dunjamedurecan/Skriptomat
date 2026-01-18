@@ -27,6 +27,7 @@ export default function Feed() {
   const [semester, setSemester] = useState('');
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [allowDownload, setAllowDownload] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -120,6 +121,7 @@ export default function Feed() {
     if (file) formData.append('file', file, file.name);
     if (courseName.trim()) formData.append('course_name', courseName);
     if (semester.trim()) formData.append('semester', semester);
+    formData.append('allow_download', allowDownload);
     try {
       setUploading(true);
       setMessage('');
@@ -232,6 +234,8 @@ export default function Feed() {
                       <small>Priloženo: {file.name} ({Math.round(file.size / 1024)} KB)</small>
                     </div>
                   )}
+
+                  <label><input type="checkbox" checked={allowDownload} onChange={(e)=>setAllowDownload(e.target.checked)}/> Dozvoli preuzimanje</label>
 
                   <button type="submit" disabled={uploading}>
                     {uploading ? 'Spremanje...' : 'Objavi'}
