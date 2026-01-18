@@ -1,6 +1,6 @@
 import React, {useState,useEffect} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../api/auth';
+import { authAPI, userAPI } from '../api/auth';
 import styles from '../styles/Login.module.css';
 import regStyles from '../styles/Registration.module.css';
 
@@ -22,7 +22,21 @@ export default function Registration(){
     const navigate = useNavigate();
     const [step, setStep]=useState(1);
     const[usinggoogle,setUsingGoogle]=useState(false);
+    const [faculties, setFaculties] = useState([]);
     const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+    useEffect(() => {
+        fetchFaculties();
+    }, []);
+
+    const fetchFaculties = async () => {
+        try {
+            const data = await userAPI.getFaculties();
+            setFaculties(data);
+        } catch (err) {
+            console.error('fetchFaculties error', err);
+        }
+    };
 
     // Email validation
     function validateEmail(email) {
@@ -342,14 +356,19 @@ export default function Registration(){
                         </div>
                         <div className={regStyles.formGroup}>
                             <label>Fakultet</label>
-                            <input
-                                type="text"
+                            <select
                                 name="faculty"
                                 value={formData.faculty}
                                 onChange={handleChange}
-                                placeholder="Npr. Fakultet elektrotehnike i računarstva"
                                 required
-                            />
+                            >
+                                <option value="">Odaberi fakultet</option>
+                                {faculties.map((faculty) => (
+                                    <option key={faculty.id} value={faculty.name}>
+                                        {faculty.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     {error && <p className={styles.error}>{error}</p>}

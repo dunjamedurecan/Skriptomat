@@ -51,6 +51,18 @@ export const userAPI = {
     const response = await apiClient.get(`/users/profile/${userId}/`);
     return response.data;
   },
+
+  // Get all courses
+  getCourses: async () => {
+    const response = await apiClient.get('/users/courses/');
+    return response.data;
+  },
+
+  // Get all faculties
+  getFaculties: async () => {
+    const response = await apiClient.get('/users/faculties/');
+    return response.data;
+  },
 };
 
 // Document API functions
