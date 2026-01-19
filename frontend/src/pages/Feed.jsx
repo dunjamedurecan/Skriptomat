@@ -5,9 +5,10 @@ import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
 import { documentsAPI,documentFeedAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
+import { Link } from "react-router-dom";
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
-
+import PdfViewer from '../components/PdfViewer';
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Feed() {
@@ -26,6 +27,7 @@ export default function Feed() {
   const [semester, setSemester] = useState('');
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [allowDownload, setAllowDownload] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -119,6 +121,7 @@ export default function Feed() {
     if (file) formData.append('file', file, file.name);
     if (courseName.trim()) formData.append('course_name', courseName);
     if (semester.trim()) formData.append('semester', semester);
+    formData.append('allow_download', allowDownload);
     try {
       setUploading(true);
       setMessage('');
@@ -232,6 +235,8 @@ export default function Feed() {
                     </div>
                   )}
 
+                  <label><input type="checkbox" checked={allowDownload} onChange={(e)=>setAllowDownload(e.target.checked)}/> Dozvoli preuzimanje</label>
+
                   <button type="submit" disabled={uploading}>
                     {uploading ? 'Spremanje...' : 'Objavi'}
                   </button>
@@ -259,10 +264,14 @@ export default function Feed() {
                   <p>📚 {post.course?.name}</p>
                   <p>🧠 Sem {post.course?.semester}</p>
                   <p>🏛️ {post.course?.faculty_name}</p>
-                  
-                  {post.file && (
+                  {post.file && post.allow_download &&(
                     <p>
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
+                    </p>
+                  ) }
+                  {post.file && (
+                    <p>
+                      <PdfViewer pdfUrl={post.file} />
                     </p>
                   )}
 
@@ -299,6 +308,12 @@ export default function Feed() {
                       authorName={post.user?.username || post.user?.first_name || 'autora'}
                       postTitle={post.title}
                     />
+                    <button 
+                    className={styles.chatButton} 
+                    onClick={() => navigate(`/document/${post.id}`)}
+                  >
+                    💬 Čavrljanje
+                  </button>
                   </div>
                 </div>
               ))

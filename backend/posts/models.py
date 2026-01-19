@@ -6,9 +6,9 @@ from users.models import Course
 def validate_pdf(file):
     if file.content_type != "application/pdf":
         raise ValidationError("Only PDF files are allowed.")
-    max_size = 5 * 1024 * 1024  # 5 MB limit
+    max_size = 50 * 1024 * 1024  # 50 MB limit
     if file.size > max_size:
-        raise ValidationError("File too large (max 5 MB).")
+        raise ValidationError("File too large (max 50 MB).")
 
 class Document(models.Model):
     class Status(models.TextChoices):
@@ -35,6 +35,7 @@ class Document(models.Model):
         blank=True,
         related_name='documents'
     )
+    allow_download=models.BooleanField(default=True)
     reviewed_by=models.ForeignKey(settings.AUTH_USER_MODEL,
         null=True,
         blank=True,

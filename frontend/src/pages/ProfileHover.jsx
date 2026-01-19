@@ -27,7 +27,6 @@ export default function ProfileHover({user}){
                 <div className={styles.profileCard}>
                     <p><strong>{fullName}</strong></p>
                     <p className={styles.usernameText}>@{username}</p>
-                    <p className={styles.link}>Pošalji poruku</p>
                     <Link to={`/profile/${username}`} className={styles.link}>Posjeti profil</Link>
                 </div>
             )}

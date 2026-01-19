@@ -1,3 +1,4 @@
+from django.http import FileResponse, Http404
 from django.shortcuts import render
 from rest_framework import viewsets, permissions
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -7,7 +8,21 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
 
+def serve_pdf(request, doc_id):
+    try:
+        doc = Document.objects.get(id=doc_id)
+    except Document.DoesNotExist:
+        raise Http404("PDF ne postoji")
 
+    
+
+    # ako nije dozvoljen download, šaljemo content-disposition inline
+    response = FileResponse(open(doc.file.path, 'rb'), content_type='application/pdf')
+    if not doc.allow_download:
+        response['Content-Disposition'] = 'inline'  # pregled u browseru
+    else:
+        response['Content-Disposition'] = f'attachment; filename="{doc.file.name}"'  # omogućuje download
+    return response
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset=Document.objects.all().order_by("-uploaded_at")
     serializer_class=DocumentSerializer
