@@ -81,6 +81,14 @@ class User(AbstractUser):
         help_text="PayPal email for receiving donations. Leave blank to disable tips on your posts."
     )
     
+    # Course subscriptions - users can subscribe to courses from their faculty
+    subscribed_courses = models.ManyToManyField(
+        Course,
+        blank=True,
+        related_name='subscribers',
+        help_text="Courses the user is subscribed to. Only courses from user's faculty."
+    )
+    
     # Login with email instead of username
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # Required when creating superuser
