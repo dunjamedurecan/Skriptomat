@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
@@ -259,12 +259,11 @@ export default function Feed() {
                 <div key={post.id} className={styles.postItem}>
                   <p><ProfileHover user={post.user || 'Nepoznato'} /></p>
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
-                  <p>{post.title}</p>
+                  <p><strong>{post.title}</strong></p>
                   <p>{post.post}</p>
                   <p>📚 {post.course?.name}</p>
                   <p>🧠 Sem {post.course?.semester}</p>
                   <p>🏛️ {post.course?.faculty_name}</p>
-                  
                   {post.file && post.allow_download &&(
                     <p>
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
@@ -278,19 +277,30 @@ export default function Feed() {
 
                   {post.reviewed_by && (
                      <p style={{ fontSize: '0.85rem', opacity: 0.75 }}>
-                     <p>Odobrio: <ProfileHover user={post.reviewed_by || 'Nepoznato'} /></p>
+                       Odobrio: <ProfileHover user={post.reviewed_by || 'Nepoznato'} />
                     </p>
                   )}
                   
                   <div className={styles.postActions}>
-                    {user.role==='student' ? (<button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
-                      {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
-                      <p>{post.total_likes}</p>
-                    </button>):(
-                      <><button className={styles.openModalBtn} onClick={()=>handleApprove(post.id)}>Odobri</button>
-                    <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button></>)
-                    }
+                    {user.role==='student' ? (
+                      <button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
+                        {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
+                        <p>{post.total_likes}</p>
+                      </button>
+                    ) : (
+                      <>
+                        <button className={styles.openModalBtn} onClick={()=>handleApprove(post.id)}>Odobri</button>
+                        <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button>
+                      </>
+                    )}
                     
+                    {/* Chat button for document discussion */}
+                    <button 
+                      className={styles.chatButton} 
+                      onClick={() => navigate(`/document/${post.id}`)}
+                    >
+                      💬 Čavrljanje
+                    </button>
                     
                     {/* Buy Me a Coffee button - only shows if author has PayPal email */}
                     <BuyMeACoffee 

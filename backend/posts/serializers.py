@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from tomlkit import document
 from posts.models import Document
 from users.models import Course, User
 

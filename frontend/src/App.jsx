@@ -27,7 +27,9 @@ export default function App(){
             </ProtectedRoute>
           }
         />
-         <Route
+         
+
+        <Route
           path="/document/:id"
           element={
             <ProtectedRoute>
