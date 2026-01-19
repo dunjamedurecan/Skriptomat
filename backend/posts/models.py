@@ -49,4 +49,8 @@ class Document(models.Model):
         return self.likes.count()
 
     def __str__(self):
-        return self.title or f"Document {self.pk}"
+        return self.title or f"Post {self.pk}"
+    
+    class Meta:
+        verbose_name = 'Post'
+        verbose_name_plural = 'Posts'

@@ -37,7 +37,12 @@ export default function Feed() {
   const fetchCourses = async () => {
     try {
       const data = await userAPI.getCourses();
-      setCourses(data);
+      // Filter courses by user's faculty
+      const userFacultyName = user?.faculty;
+      const filteredCourses = userFacultyName 
+        ? data.filter(course => course.faculty === userFacultyName)
+        : data;
+      setCourses(filteredCourses);
     } catch (err) {
       console.error('fetchCourses error', err);
     }
@@ -300,7 +305,7 @@ export default function Feed() {
                   <option value="">Odaberi kolegij...</option>
                   {courses.map((course) => (
                     <option key={course.id} value={course.id}>
-                      {course.name} - {course.faculty} (Sem {course.semester})
+                      {course.name} (Sem {course.semester})
                     </option>
                   ))}
                 </select>
