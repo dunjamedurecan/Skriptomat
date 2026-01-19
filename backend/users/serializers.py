@@ -95,9 +95,11 @@ class UserSerializer(serializers.ModelSerializer):
     """
     role=serializers.StringRelatedField()
     faculty=serializers.StringRelatedField()
+    subscribed_courses = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined', 'role', 'faculty', 'paypal_email']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined', 'role', 'faculty', 'paypal_email', 'subscribed_courses']
         read_only_fields = ['id', 'date_joined']
 
 

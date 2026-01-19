@@ -63,6 +63,18 @@ export const userAPI = {
     const response = await apiClient.get('/users/faculties/');
     return response.data;
   },
+
+  // Subscribe to a course
+  subscribeCourse: async (courseId) => {
+    const response = await apiClient.post(`/users/courses/${courseId}/subscribe/`);
+    return response.data;
+  },
+
+  // Unsubscribe from a course
+  unsubscribeCourse: async (courseId) => {
+    const response = await apiClient.post(`/users/courses/${courseId}/unsubscribe/`);
+    return response.data;
+  },
 };
 
 // Document API functions

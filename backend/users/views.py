@@ -377,3 +377,55 @@ class FacultyListView(APIView):
             for faculty in faculties
         ]
         return Response(data, status=status.HTTP_200_OK)
+
+
+class CourseSubscribeView(APIView):
+    """
+    POST /api/users/courses/<course_id>/subscribe/ - Subscribe to a course
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, course_id):
+        user = request.user
+        
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response(
+                {"error": "Course not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Add subscription (frontend already filters by faculty, so no need to double-check)
+        user.subscribed_courses.add(course)
+        
+        return Response(
+            {"message": f"Successfully subscribed to {course.name}"},
+            status=status.HTTP_200_OK
+        )
+
+
+class CourseUnsubscribeView(APIView):
+    """
+    POST /api/users/courses/<course_id>/unsubscribe/ - Unsubscribe from a course
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, course_id):
+        user = request.user
+        
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response(
+                {"error": "Course not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Remove subscription
+        user.subscribed_courses.remove(course)
+        
+        return Response(
+            {"message": f"Successfully unsubscribed from {course.name}"},
+            status=status.HTTP_200_OK
+        )

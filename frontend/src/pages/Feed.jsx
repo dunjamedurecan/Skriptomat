@@ -27,6 +27,11 @@ export default function Feed() {
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
 
+  // Filter states
+  const [filterCourseId, setFilterCourseId] = useState('');
+  const [showSubscriptionsOnly, setShowSubscriptionsOnly] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -51,10 +56,8 @@ export default function Feed() {
   const fetchPosts = async () => {
     try {
       const data = await documentFeedAPI.getAll();
-      const sortedPosts=data.sort((a,b)=>b.total_likes - a.total_likes);
       console.log("Api response",data); //prilikom učitavanja objave se sortiraju po broju lajkova
-      setPosts(sortedPosts);
-      console.log(posts);
+      setPosts(data);
     } catch (err) {
       console.error('fetchPosts error', err);
       
@@ -86,6 +89,73 @@ export default function Feed() {
       new Date(b.uploaded_at) - new Date(a.uploaded_at)
     );
     setPosts(sortedPosts);
+  };
+
+  const handleSortByLikes = () => {
+    const sortedPosts = [...posts].sort((a, b) => b.total_likes - a.total_likes);
+    setPosts(sortedPosts);
+  };
+
+  const handleToggleSubscriptions = () => {
+    setShowSubscriptionsOnly(!showSubscriptionsOnly);
+  };
+
+  const handleCourseFilter = (e) => {
+    const courseId = e.target.value;
+    setFilterCourseId(courseId);
+    
+    // Check if user is subscribed to this course
+    if (courseId && user?.subscribed_courses) {
+      setIsSubscribed(user.subscribed_courses.includes(parseInt(courseId)));
+    } else {
+      setIsSubscribed(false);
+    }
+  };
+
+  const handleSubscriptionToggle = async (e) => {
+    const shouldSubscribe = e.target.checked;
+    
+    try {
+      if (shouldSubscribe) {
+        await userAPI.subscribeCourse(filterCourseId);
+        setIsSubscribed(true);
+        // Update user context to reflect new subscription
+        if (user) {
+          user.subscribed_courses = [...(user.subscribed_courses || []), parseInt(filterCourseId)];
+        }
+      } else {
+        await userAPI.unsubscribeCourse(filterCourseId);
+        setIsSubscribed(false);
+        // Update user context to remove subscription
+        if (user && user.subscribed_courses) {
+          user.subscribed_courses = user.subscribed_courses.filter(id => id !== parseInt(filterCourseId));
+        }
+      }
+    } catch (err) {
+      console.error('Subscription toggle error', err);
+      setMessage('Greška pri promjeni pretplate.');
+      // Revert checkbox state on error
+      setIsSubscribed(!shouldSubscribe);
+    }
+  };
+
+  // Get filtered posts based on active filters
+  const getFilteredPosts = () => {
+    let filtered = [...posts];
+
+    // Filter by subscriptions
+    if (showSubscriptionsOnly && user?.subscribed_courses) {
+      filtered = filtered.filter(post => 
+        user.subscribed_courses.includes(post.course?.id)
+      );
+    }
+
+    // Filter by selected course
+    if (filterCourseId) {
+      filtered = filtered.filter(post => post.course?.id === parseInt(filterCourseId));
+    }
+
+    return filtered;
   };
 
   function onFileChange(e) {
@@ -197,17 +267,51 @@ export default function Feed() {
 
       <main className={styles.feedMain}>
         {posts.length > 0 &&
-        <div>
+        <div className={styles.filterBar}>
           <button onClick={handleSortByYear} className={styles.openModalBtn}>Sortiraj po datumu</button>
+          <button onClick={handleSortByLikes} className={styles.openModalBtn}>Sortiraj prema najbolja ocjena</button>
+          <button 
+            onClick={handleToggleSubscriptions} 
+            className={styles.openModalBtn}
+            style={{
+              background: showSubscriptionsOnly 
+                ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                : undefined
+            }}
+          >
+            {showSubscriptionsOnly ? '✓ ' : ''}Filtriraj samo pretplate
+          </button>
+          <select 
+            className={styles.filterSelect}
+            value={filterCourseId}
+            onChange={handleCourseFilter}
+          >
+            <option value="">Odaberi kolegij</option>
+            {courses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.name} (Sem {course.semester})
+              </option>
+            ))}
+          </select>
+          {filterCourseId && (
+            <label className={styles.subscribeLabel}>
+              <input
+                type="checkbox"
+                checked={isSubscribed}
+                onChange={handleSubscriptionToggle}
+              />
+              <span>Pretplati me na ovaj kolegij</span>
+            </label>
+          )}
         </div>} 
         <div className={styles.feedCard}>
           <button className={styles.openModalBtn} onClick={() => setShowModal(true)}>Nova objava</button>
           
           <div className={styles.postsList}>
-            {posts.length === 0 ? (
+            {getFilteredPosts().length === 0 ? (
               <p className={styles.noPosts}>Još nema objava.</p>
             ) : (
-              posts.map((post) => (
+              getFilteredPosts().map((post) => (
                 <div key={post.id} className={styles.postItem}>
                   <p><ProfileHover user={post.user || 'Nepoznato'} /></p>
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>

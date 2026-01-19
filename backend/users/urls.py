@@ -9,7 +9,9 @@ from .views import (
     PublicUserProfileView,
     UserProfileView,
     CourseListView,
-    FacultyListView
+    FacultyListView,
+    CourseSubscribeView,
+    CourseUnsubscribeView
 )
 
 urlpatterns = [
@@ -27,4 +29,7 @@ urlpatterns = [
     path('courses/', CourseListView.as_view(), name='courses'),
     # Faculties endpoint
     path('faculties/', FacultyListView.as_view(), name='faculties'),
+    # Course subscription endpoints
+    path('courses/<int:course_id>/subscribe/', CourseSubscribeView.as_view(), name='course_subscribe'),
+    path('courses/<int:course_id>/unsubscribe/', CourseUnsubscribeView.as_view(), name='course_unsubscribe'),
 ]
