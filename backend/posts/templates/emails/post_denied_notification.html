@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>❌ Tvoja objava nije odobrena</h2>
+        </div>
+        <div class="content">
+            <p>Pozdrav {{ user_name }},</p>
+            <p>Nažalost, tvoja objava nije prošla moderaciju.</p>
+            
+            <h3>{{ post_title }}</h3>
+            <p><strong>Kolegij:</strong> {{ course_name }}</p>
+            <p><strong>Moderator:</strong> {{ moderator_name }}</p>
+            
+            <p>Mogući razlozi:</p>
+            <ul>
+                <li>Sadržaj ne odgovara kolegiju</li>
+                <li>Kvaliteta materijala nije odgovarajuća</li>
+                <li>Kršenje pravila platforme</li>
+            </ul>
+            
+            <p>Možeš pokušati ponovo sa drugačijim materijalom.</p>
+        </div>
+        <div class="footer">
+            <p>Hvala na razumijevanju! 🎓</p>
+        </div>
+    </div>
+</body>
+</html>
