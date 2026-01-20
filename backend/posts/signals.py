@@ -100,11 +100,11 @@ def notify_author(instance):
     }
     
     if instance.status == 'approved':
-        template = 'emails/post_approved.html'
+        template = 'emails/post_approved_notification.html'
         subject = f'✅ Tvoja objava "{instance.title}" je odobrena!'
         print(f"📧 Sending approval email to author {author.email}")
     else:  # rejected
-        template = 'emails/post_denied.html'
+        template = 'emails/post_denied_notification.html'
         subject = f'❌ Tvoja objava "{instance.title}" nije odobrena'
         print(f"📧 Sending rejection email to author {author.email}")
     
