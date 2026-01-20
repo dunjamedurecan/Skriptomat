@@ -166,10 +166,10 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
       <button 
         className={styles.coffeeButton}
         onClick={handleModalOpen}
-        title={`Kupi ${authorName || 'autoru'} kavu`}
+        title={`Kupite ${authorName || 'autoru'} kavu`}
       >
+        <span className={styles.coffeeText}>Kupi mi kavu</span>
         <FaCoffee className={styles.coffeeIcon} />
-        <span className={styles.coffeeText}>Kupi kavu</span>
       </button>
 
       {showModal && (
@@ -181,13 +181,13 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
             
             <div className={styles.modalHeader}>
               <FaCoffee className={styles.modalCoffeeIcon} />
-              <h3>Kupi kavu za {authorName || 'autora'}</h3>
+              <h3>Kupite kavu za {authorName || 'autora'}</h3>
             </div>
 
             {success ? (
               <div className={styles.successMessage}>
                 <h4>✅ Hvala na donaciji!</h4>
-                <p>Tvoja podrška mnogo znači {authorName ? `za ${authorName}` : 'autoru'}.</p>
+                <p>Vaša podrška je cijenjena.</p>
                 <button className={styles.closeSuccessButton} onClick={handleModalClose}>
                   Zatvori
                 </button>
@@ -195,11 +195,11 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
             ) : (
               <>
                 <p className={styles.modalDescription}>
-                  Podrži autora ove objave malom donacijom. Sredstva idu direktno na njihov PayPal račun.
+                  Podržite autoricu/a ove objave malom donacijom. Sredstva idu direktno na njihov PayPal račun.
                 </p>
 
                 <div className={styles.amountSection}>
-                  <label>Odaberi iznos (EUR):</label>
+                  <label>Odaberite iznos (EUR):</label>
                   <div className={styles.amountButtons}>
                     {predefinedAmounts.map((amt) => (
                       <button
@@ -213,7 +213,7 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
                   </div>
                   
                   <div className={styles.customAmountWrapper}>
-                    <label>Ili unesi svoj iznos:</label>
+                    <label>Ili unesite svoj iznos:</label>
                     <div className={styles.customAmountInput}>
                       <span className={styles.currencySymbol}>€</span>
                       <input
@@ -256,8 +256,8 @@ export default function BuyMeACoffee({ authorPaypalEmail, authorName, postTitle 
                 )}
 
                 <p className={styles.disclaimer}>
-                  Bit ćeš preusmjeren na PayPal za sigurno plaćanje.
-                  Možeš platiti PayPal računom ili karticom.
+                  Bit ćete preusmjereni na PayPal za sigurno plaćanje.
+                  Možete platiti PayPal računom ili karticom.
                 </p>
               </>
             )}

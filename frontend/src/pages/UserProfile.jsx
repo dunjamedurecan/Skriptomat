@@ -91,9 +91,9 @@ export default function UserProfile() {
 
           {/* PayPal Email Settings */}
           <div className={styles.paypalSection}>
-            <h3>☕ Donacije postavke</h3>
+            <h3>☕ Postavke donacija</h3>
             <p className={styles.paypalInfo}>
-              Dodaj svoj PayPal email kako bi mogao primati donacije za svoje skripte.
+              Dodajte svoj PayPal email kako biste mogli primati donacije za svoje skripte.
             </p>
             <form onSubmit={handlePaypalSave} className={styles.paypalForm}>
               <input

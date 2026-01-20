@@ -118,7 +118,8 @@ export const documentFeedAPI={
     return response.data;
   },
   decline: async(id)=>{
-    const response=await apiClient.post(`/posts/documents-feed/${id}/decline/`);
+    // backend action is named `reject`, not `decline` — use that path
+    const response=await apiClient.post(`/posts/documents-feed/${id}/reject/`);
     return response.data;
   }
 }

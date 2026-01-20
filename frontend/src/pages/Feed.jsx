@@ -208,15 +208,21 @@ export default function Feed() {
       // Use documentsAPI instead of fetch
       const savedPost = await documentsAPI.upload(formData);
       
-      // Success - update posts list
-      setPosts((prev) => [savedPost, ...prev]);
+      // Success - only add to feed if already approved (moderator uploaded or auto-approved)
+      // Otherwise it stays pending and will appear after moderator approval + refresh
+      if (savedPost.status === 'approved') {
+        setPosts((prev) => [savedPost, ...prev]);
+      }
+      
       setNewPost('');
       setTitle('');
       setSelectedCourseId('');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setShowModal(false);
-      setMessage('Objava uspješno dodana!');
+      setMessage(savedPost.status === 'approved' 
+        ? 'Objava uspješno dodana!' 
+        : 'Objava poslana na odobrenje moderatoru.');
       
     } catch (err) {
       console.error('handleAddPost error', err);
@@ -366,12 +372,6 @@ export default function Feed() {
                       authorName={post.user?.username || post.user?.first_name || 'autora'}
                       postTitle={post.title}
                     />
-                    <button 
-                    className={styles.chatButton} 
-                    onClick={() => navigate(`/document/${post.id}`)}
-                  >
-                    💬 Čavrljanje
-                  </button>
                   </div>
                 </div>
               ))
