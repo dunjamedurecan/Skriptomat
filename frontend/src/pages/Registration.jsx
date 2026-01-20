@@ -19,6 +19,7 @@ export default function Registration(){
     // UI state
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleReady, setGoogleReady] = useState(false);
     const navigate = useNavigate();
     const [step, setStep]=useState(1);
     const[usinggoogle,setUsingGoogle]=useState(false);
@@ -176,41 +177,55 @@ export default function Registration(){
 
     }
     useEffect(() => {
-            if (!GOOGLE_CLIENT_ID) {
-                console.warn('VITE_GOOGLE_CLIENT_ID not set');
-                return;
+        if (!GOOGLE_CLIENT_ID) {
+            console.warn('VITE_GOOGLE_CLIENT_ID not set');
+            return;
+        }
+        
+        // Check if script already exists
+        const existingScript = document.getElementById('google-client-script');
+        
+        if (existingScript) {
+            // Script exists, check if Google is ready
+            if (window.google?.accounts?.id) {
+                initializeGoogleButton();
+            } else {
+                // Wait for script to load
+                existingScript.addEventListener('load', initializeGoogleButton);
             }
-            
-            // avoid loading twice
-            if (document.getElementById('google-client-script')) return;
+            return;
+        }
+
+        // Create new script
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.id = 'google-client-script';
+        script.onload = initializeGoogleButton;
+        document.body.appendChild(script);
+    }, [GOOGLE_CLIENT_ID]);
     
-            const script = document.createElement('script');
-            script.src = 'https://accounts.google.com/gsi/client';
-            script.async = true;
-            script.defer = true;
-            script.id = 'google-client-script';
-            script.onload = () => {
-                if (window.google && window.google.accounts && window.google.accounts.id) {
-                    window.google.accounts.id.initialize({
-                        client_id: GOOGLE_CLIENT_ID,
-                        callback: handleCredentialResponse,
-                        ux_mode: 'popup' // popup is friendlier for SPA
-                    });
-    
-                    // render button inside container
-                    const container = document.getElementById('googleSignInDiv');
-                    if (container) {
-                        window.google.accounts.id.renderButton(container, {
-                            theme: 'outline',
-                            size: 'large',
-                            text: 'signin_with'
-                        });
-                    }
-                }
-            };
-            document.body.appendChild(script);
-        }, [GOOGLE_CLIENT_ID])
-        async function handleCredentialResponse(response) {
+    const initializeGoogleButton = () => {
+        if (window.google?.accounts?.id) {
+            window.google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredentialResponse,
+                ux_mode: 'popup'
+            });
+
+            const container = document.getElementById('googleSignInDiv');
+            if (container) {
+                window.google.accounts.id.renderButton(container, {
+                    theme: 'outline',
+                    size: 'large',
+                    text: 'signin_with'
+                });
+                setGoogleReady(true);
+            }
+        }
+    };
+    async function handleCredentialResponse(response) {
                 setError('');
                 setLoading(true);
         
