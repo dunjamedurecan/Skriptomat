@@ -13,14 +13,19 @@ def notify_course_subscribers(sender, instance, created, **kwargs):
     """
     print(f"🔔 Signal triggered for post {instance.id}, status: {instance.status}")
     
-    # Only notify when status changes to approved (not on initial creation)
+   # Notify author if post is approved or rejected (not pending)
+    if instance.status in ['approved', 'rejected']:
+        notify_author(instance)
+
+    # Only notify users to approved (not on initial creation)
     if instance.status != 'approved':
-        print(f"❌ Post status is '{instance.status}', not approved. Skipping email.")
+        print(f"❌ Post status is '{instance.status}', not approved. Skipping subscriber notification email.")
         return
     
     # Get the course and its subscribers
     course = instance.course
     if not course:
+        print("❌ No course associated with post. Skipping email.")
         return
     
     print(f"📚 Course: {course.name}")
