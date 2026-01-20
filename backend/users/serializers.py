@@ -88,6 +88,66 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+class GoogleRegistrationCompleteSerializer(serializers.ModelSerializer):
+    """
+    Serializer for completing Google registration with faculty, username, and role.
+    """
+    role = serializers.CharField()
+    faculty = serializers.CharField()
+    
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'first_name', 'last_name', 'role', 'faculty']
+        extra_kwargs = {
+            'email': {'required': True},
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+        }
+    
+    def validate_email(self, value):
+        """Check if email already exists"""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value.lower()
+    
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This username is not available.")
+        return value
+    
+    def validate_role(self, value):
+        """Convert role string to Role instance"""
+        if isinstance(value, str):
+            role = Role.objects.filter(name=value).first()
+            if not role:
+                raise serializers.ValidationError(f"Role '{value}' does not exist.")
+            return role
+        return value
+    
+    def validate_faculty(self, value):
+        """Convert faculty string to Faculty instance"""
+        if isinstance(value, str):
+            faculty, created = Faculty.objects.get_or_create(name=value.strip())
+            return faculty
+        return value
+    
+    def validate(self, data):
+        if "role" not in data:
+            raise serializers.ValidationError({"role": "Role field is required."})
+        if "faculty" not in data:
+            raise serializers.ValidationError({"faculty": "Faculty field is required."})
+        return data
+    
+    def create(self, validated_data):
+        """Create Google user WITHOUT password (they use Google OAuth to login)"""
+        user = User(**validated_data)
+        user.set_unusable_password()  # No password needed for Google users
+        user.save()
+        return user
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for returning user data (without password).

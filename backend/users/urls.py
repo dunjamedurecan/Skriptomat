@@ -5,6 +5,7 @@ from .views import (
     TokenRefreshView, 
     GoogleLoginView, 
     GoogleRegisterView,
+    GoogleRegistrationCompleteView,
     CurrentUserView,
     PublicUserProfileView,
     UserProfileView,
@@ -20,6 +21,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('google/', GoogleLoginView.as_view(), name='google_login'),
     path('googleregister/', GoogleRegisterView.as_view(), name='google_register'),
+    path('googleregister/complete/', GoogleRegistrationCompleteView.as_view(), name='google_register_complete'),
     # User profile endpoints for Buy Me a Coffee feature
     path('me/', CurrentUserView.as_view(), name='current_user'),
     path('profile/<int:user_id>/', PublicUserProfileView.as_view(), name='public_profile'),

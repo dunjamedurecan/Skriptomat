@@ -281,6 +281,48 @@ class GoogleRegisterView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class GoogleRegistrationCompleteView(APIView):
+    """
+    Complete Google registration by providing faculty, username, and role.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        from .serializers import GoogleRegistrationCompleteSerializer
+        
+        serializer = GoogleRegistrationCompleteSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            user = serializer.save()
+            
+            # Auto-login the user after registration
+            try:
+                application = Application.objects.get(name="Skriptomat Frontend")
+            except Application.DoesNotExist:
+                return Response({"error": "OAuth2 application not configured."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            expires = now() + timedelta(seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS)
+            access_token = AccessToken.objects.create(
+                user=user, application=application, token=generate_token(), expires=expires, scope="read write"
+            )
+            refresh_token = RefreshToken.objects.create(user=user, application=application, token=generate_token(), access_token=access_token)
+            user_data = UserSerializer(user).data
+
+            return Response(
+                {
+                    "access_token": access_token.token,
+                    "refresh_token": refresh_token.token,
+                    "expires_in": oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+                    "token_type": "Bearer",
+                    "user": user_data,
+                    "message": "Google registration completed successfully!"
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CurrentUserView(APIView):
     """
     GET /api/users/me/ - Get current user's profile
