@@ -29,6 +29,11 @@ export const authAPI = {
   googleRegister: async ({id_token})=>{
     const response=await apiClient.post('/users/googleregister/',{id_token});
     return response.data;
+  },
+
+  googleRegisterComplete: async (userData) => {
+    const response = await apiClient.post('/users/googleregister/complete/', userData);
+    return response.data;
   }
 };
 
@@ -49,6 +54,30 @@ export const userAPI = {
   // Get public profile of any user (to check if they accept donations)
   getPublicProfile: async (userId) => {
     const response = await apiClient.get(`/users/profile/${userId}/`);
+    return response.data;
+  },
+
+  // Get all courses
+  getCourses: async () => {
+    const response = await apiClient.get('/users/courses/');
+    return response.data;
+  },
+
+  // Get all faculties
+  getFaculties: async () => {
+    const response = await apiClient.get('/users/faculties/');
+    return response.data;
+  },
+
+  // Subscribe to a course
+  subscribeCourse: async (courseId) => {
+    const response = await apiClient.post(`/users/courses/${courseId}/subscribe/`);
+    return response.data;
+  },
+
+  // Unsubscribe from a course
+  unsubscribeCourse: async (courseId) => {
+    const response = await apiClient.post(`/users/courses/${courseId}/unsubscribe/`);
     return response.data;
   },
 };

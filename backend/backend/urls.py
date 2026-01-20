@@ -19,8 +19,26 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+
+
+def api_root(request):
+    """Simple API info page for the root URL"""
+    return JsonResponse({
+        'message': 'Skriptomat API',
+        'version': '1.0',
+        'endpoints': {
+            'admin': '/admin/',
+            'posts': '/api/posts/',
+            'users': '/api/users/',
+            'accounts': '/accounts/',
+        },
+        'documentation': 'Visit /admin/ for the admin panel'
+    })
+
 
 urlpatterns = [
+    path("", api_root, name='api-root'),
     path("api/posts/", include("posts.urls")),
     path("api/users/", include("users.urls")),
     path("admin/", admin.site.urls),

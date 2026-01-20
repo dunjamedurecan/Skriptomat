@@ -2,7 +2,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from users.models import Faculty, Role
+from users.models import Faculty, Role, Course
 from .serializers import (
     UserRegistrationSerializer, 
     UserSerializer, 
@@ -191,19 +191,13 @@ class GoogleLoginView(APIView):
         if not email or not email_verified:
             return Response({"error": "Google account email not available or not verified."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Find existing user or create
+        # Find existing user - DO NOT auto-create for login
         user = User.objects.filter(email__iexact=email).first()
         if not user:
-            local_part = email.split("@")[0]
-            base_username = local_part[:30]
-            username = base_username
-            suffix = 0
-            while User.objects.filter(username__iexact=username).exists():
-                suffix += 1
-                username = f"{base_username[:28]}{suffix}"
-            random_password = secrets.token_urlsafe(16)
-            user = User.objects.create_user(username=username, email=email, password=random_password)
-            user.save()
+            return Response({
+                "error": "Korisnički račun ne postoji. Molimo najprije se registrirajte.",
+                "action_required": "register"
+            }, status=status.HTTP_404_NOT_FOUND)
 
         if not user.is_active:
             return Response({"error": "Account is disabled."}, status=status.HTTP_403_FORBIDDEN)
@@ -281,6 +275,48 @@ class GoogleRegisterView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class GoogleRegistrationCompleteView(APIView):
+    """
+    Complete Google registration by providing faculty, username, and role.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        from .serializers import GoogleRegistrationCompleteSerializer
+        
+        serializer = GoogleRegistrationCompleteSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            user = serializer.save()
+            
+            # Auto-login the user after registration
+            try:
+                application = Application.objects.get(name="Skriptomat Frontend")
+            except Application.DoesNotExist:
+                return Response({"error": "OAuth2 application not configured."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            expires = now() + timedelta(seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS)
+            access_token = AccessToken.objects.create(
+                user=user, application=application, token=generate_token(), expires=expires, scope="read write"
+            )
+            refresh_token = RefreshToken.objects.create(user=user, application=application, token=generate_token(), access_token=access_token)
+            user_data = UserSerializer(user).data
+
+            return Response(
+                {
+                    "access_token": access_token.token,
+                    "refresh_token": refresh_token.token,
+                    "expires_in": oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+                    "token_type": "Bearer",
+                    "user": user_data,
+                    "message": "Google registration completed successfully!"
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CurrentUserView(APIView):
     """
     GET /api/users/me/ - Get current user's profile
@@ -338,3 +374,94 @@ class UserProfileView(APIView):
             return Response(serializer.data)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CourseListView(APIView):
+    """
+    GET /api/users/courses/ - Get all courses with their faculty information
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        courses = Course.objects.select_related('faculty').all()
+        data = [
+            {
+                'id': course.id,
+                'name': course.name,
+                'semester': course.semester,
+                'faculty': course.faculty.name,
+                'faculty_id': course.faculty.id,
+            }
+            for course in courses
+        ]
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class FacultyListView(APIView):
+    """
+    GET /api/users/faculties/ - Get all faculties
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        faculties = Faculty.objects.all()
+        data = [
+            {
+                'id': faculty.id,
+                'name': faculty.name,
+            }
+            for faculty in faculties
+        ]
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class CourseSubscribeView(APIView):
+    """
+    POST /api/users/courses/<course_id>/subscribe/ - Subscribe to a course
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, course_id):
+        user = request.user
+        
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response(
+                {"error": "Course not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Add subscription (frontend already filters by faculty, so no need to double-check)
+        user.subscribed_courses.add(course)
+        
+        return Response(
+            {"message": f"Successfully subscribed to {course.name}"},
+            status=status.HTTP_200_OK
+        )
+
+
+class CourseUnsubscribeView(APIView):
+    """
+    POST /api/users/courses/<course_id>/unsubscribe/ - Unsubscribe from a course
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, course_id):
+        user = request.user
+        
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response(
+                {"error": "Course not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Remove subscription
+        user.subscribed_courses.remove(course)
+        
+        return Response(
+            {"message": f"Successfully unsubscribed from {course.name}"},
+            status=status.HTTP_200_OK
+        )

@@ -75,7 +75,14 @@ class PostViewSet(viewsets.ModelViewSet):
             if user.faculty:
                 queryset = queryset.filter(course__faculty=user.faculty)
             return queryset.order_by("-uploaded_at")
+        
+        # For students and other users, show only approved posts from their faculty
         queryset = Document.objects.filter(status=Document.Status.APPROVED)
+        
+        # Filter by user's faculty
+        if user.faculty:
+            queryset = queryset.filter(course__faculty=user.faculty)
+        
         return queryset.order_by("-uploaded_at")
     
     @action(detail=True, methods=['post'])

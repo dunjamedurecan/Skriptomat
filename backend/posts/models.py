@@ -4,8 +4,12 @@ from backend import settings
 from users.models import Course
 
 def validate_pdf(file):
-    if file.content_type != "application/pdf":
-        raise ValidationError("Only PDF files are allowed.")
+    # Only validate if it's a new upload (not an already-saved file)
+    if hasattr(file, 'content_type'):
+        if file.content_type != "application/pdf":
+            raise ValidationError("Only PDF files are allowed.")
+    
+    # Check file size (works for both new uploads and saved files)
     max_size = 50 * 1024 * 1024  # 50 MB limit
     if file.size > max_size:
         raise ValidationError("File too large (max 50 MB).")
@@ -47,4 +51,8 @@ class Document(models.Model):
         return self.likes.count()
 
     def __str__(self):
-        return self.title or f"Document {self.pk}"
+        return self.title or f"Post {self.pk}"
+    
+    class Meta:
+        verbose_name = 'Post'
+        verbose_name_plural = 'Posts'

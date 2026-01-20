@@ -12,6 +12,7 @@ __pycache__/
 *.pyo
 *.pyd
 env/
+.env
 .venv/
 venv/
 pip-log.txt
@@ -42,6 +43,7 @@ yarn-error.log*
 .env.local
 .env.*.local
 backend/.env
+frontend/.env
 secrets.json
 
 # Keep environment templates in Git:

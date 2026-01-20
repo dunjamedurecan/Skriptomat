@@ -1,6 +1,6 @@
 import React, {useState,useEffect} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../api/auth';
+import { authAPI, userAPI } from '../api/auth';
 import styles from '../styles/Login.module.css';
 import regStyles from '../styles/Registration.module.css';
 
@@ -19,10 +19,25 @@ export default function Registration(){
     // UI state
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleReady, setGoogleReady] = useState(false);
     const navigate = useNavigate();
     const [step, setStep]=useState(1);
     const[usinggoogle,setUsingGoogle]=useState(false);
+    const [faculties, setFaculties] = useState([]);
     const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+    useEffect(() => {
+        fetchFaculties();
+    }, []);
+
+    const fetchFaculties = async () => {
+        try {
+            const data = await userAPI.getFaculties();
+            setFaculties(data);
+        } catch (err) {
+            console.error('fetchFaculties error', err);
+        }
+    };
 
     // Email validation
     function validateEmail(email) {
@@ -115,9 +130,22 @@ export default function Registration(){
         setLoading(true);
         
         try {
-             console.log("Podaci za registraciju:", formData);
-            const response = await authAPI.register(formData);
+            console.log("Podaci za registraciju:", formData);
+            
+            // Use different endpoint for Google users
+            const response = usinggoogle 
+                ? await authAPI.googleRegisterComplete(formData)
+                : await authAPI.register(formData);
+            
             console.log('Registration successful:', response);
+            
+            // If Google registration, auto-login with returned tokens
+            if (usinggoogle && response.access_token) {
+                localStorage.setItem('access_token', response.access_token);
+                localStorage.setItem('refresh_token', response.refresh_token);
+                navigate('/feed');
+                return;
+            }
             
             // Show success message and redirect
             alert('Registracija uspješna! Molimo prijavite se.');
@@ -149,41 +177,55 @@ export default function Registration(){
 
     }
     useEffect(() => {
-            if (!GOOGLE_CLIENT_ID) {
-                console.warn('VITE_GOOGLE_CLIENT_ID not set');
-                return;
+        if (!GOOGLE_CLIENT_ID) {
+            console.warn('VITE_GOOGLE_CLIENT_ID not set');
+            return;
+        }
+        
+        // Check if script already exists
+        const existingScript = document.getElementById('google-client-script');
+        
+        if (existingScript) {
+            // Script exists, check if Google is ready
+            if (window.google?.accounts?.id) {
+                initializeGoogleButton();
+            } else {
+                // Wait for script to load
+                existingScript.addEventListener('load', initializeGoogleButton);
             }
-            
-            // avoid loading twice
-            if (document.getElementById('google-client-script')) return;
+            return;
+        }
+
+        // Create new script
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.id = 'google-client-script';
+        script.onload = initializeGoogleButton;
+        document.body.appendChild(script);
+    }, [GOOGLE_CLIENT_ID]);
     
-            const script = document.createElement('script');
-            script.src = 'https://accounts.google.com/gsi/client';
-            script.async = true;
-            script.defer = true;
-            script.id = 'google-client-script';
-            script.onload = () => {
-                if (window.google && window.google.accounts && window.google.accounts.id) {
-                    window.google.accounts.id.initialize({
-                        client_id: GOOGLE_CLIENT_ID,
-                        callback: handleCredentialResponse,
-                        ux_mode: 'popup' // popup is friendlier for SPA
-                    });
-    
-                    // render button inside container
-                    const container = document.getElementById('googleSignInDiv');
-                    if (container) {
-                        window.google.accounts.id.renderButton(container, {
-                            theme: 'outline',
-                            size: 'large',
-                            text: 'signin_with'
-                        });
-                    }
-                }
-            };
-            document.body.appendChild(script);
-        }, [GOOGLE_CLIENT_ID])
-        async function handleCredentialResponse(response) {
+    const initializeGoogleButton = () => {
+        if (window.google?.accounts?.id) {
+            window.google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredentialResponse,
+                ux_mode: 'popup'
+            });
+
+            const container = document.getElementById('googleSignInDiv');
+            if (container) {
+                window.google.accounts.id.renderButton(container, {
+                    theme: 'outline',
+                    size: 'large',
+                    text: 'signin_with'
+                });
+                setGoogleReady(true);
+            }
+        }
+    };
+    async function handleCredentialResponse(response) {
                 setError('');
                 setLoading(true);
         
@@ -198,12 +240,14 @@ export default function Registration(){
                     // send id_token to your backend endpoint
                     const data = await authAPI.googleRegister({ id_token });
                     console.log('Google registration successful:', data);
-                    console.log(data.email);
+                    
+                    // Store Google data (email, names) and move to completion step
                     setFormData({
                         ...formData,
-                        email:data.email,
+                        email: data.email,
+                        first_name: data.first_name || '',
+                        last_name: data.last_name || ''
                     });
-                    console.log("Postavljeni podaci nakon Google registracije,:",formData);
                     setStep(2);
                     setUsingGoogle(true);
                 } catch (err) {
@@ -279,33 +323,14 @@ export default function Registration(){
                                 />
                             </div>
                         </div>
-                        {usinggoogle ? (<div className={regStyles.inputRow}>
-                            <div className={styles.formGroup}>
-                                <label>Lozinka za prijavu putem maila</label>
-                                <input
-                                    type='password'
-                                    name='password'
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    placeholder='••••••••'
-                                    required
-                                />
+                        {usinggoogle && (
+                            <div className={regStyles.googleInfo}>
+                                <p style={{color: '#10b981', fontSize: '0.9rem', marginBottom: '1rem'}}>✓ Registracija putem Google računa</p>
                             </div>
-                            <div className={styles.formGroup}>
-                                <label>Ponovi lozinku</label>
-                                <input
-                                    type='password'
-                                    name='password_confirm'
-                                    value={formData.password_confirm}
-                                    onChange={handleChange}
-                                    placeholder='••••••••'
-                                    required
-                                />
-                            </div>
-                        </div>):null}
+                        )}
                         <div className={regStyles.inputRow}>
                         <div className={regStyles.formGroup}>
-                            <label>Ime (opcionalno)</label>
+                            <label>Ime {usinggoogle ? '(od Google - moguće promijeniti)' : '(opcionalno)'}</label>
                             <input
                                 type='text'
                                 name='first_name'
@@ -316,7 +341,7 @@ export default function Registration(){
                         </div>
 
                         <div className={regStyles.formGroup}>
-                            <label>Prezime (opcionalno)</label>
+                            <label>Prezime {usinggoogle ? '(od Google - moguće promijeniti)' : '(opcionalno)'}</label>
                             <input
                                 type='text'
                                 name='last_name'
@@ -342,14 +367,19 @@ export default function Registration(){
                         </div>
                         <div className={regStyles.formGroup}>
                             <label>Fakultet</label>
-                            <input
-                                type="text"
+                            <select
                                 name="faculty"
                                 value={formData.faculty}
                                 onChange={handleChange}
-                                placeholder="Npr. Fakultet elektrotehnike i računarstva"
                                 required
-                            />
+                            >
+                                <option value="">Odaberi fakultet</option>
+                                {faculties.map((faculty) => (
+                                    <option key={faculty.id} value={faculty.name}>
+                                        {faculty.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     {error && <p className={styles.error}>{error}</p>}

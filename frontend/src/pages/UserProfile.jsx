@@ -93,7 +93,7 @@ export default function UserProfile() {
           <div className={styles.paypalSection}>
             <h3>☕ Donacije postavke</h3>
             <p className={styles.paypalInfo}>
-              Dodaj svoj PayPal email da primaš donacije na svojim objavama.
+              Dodaj svoj PayPal email kako bi mogao primati donacije za svoje skripte.
             </p>
             <form onSubmit={handlePaypalSave} className={styles.paypalForm}>
               <input

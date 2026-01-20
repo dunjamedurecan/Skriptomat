@@ -3,9 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import styles from '../styles/Feed.module.css';
 import commonStyles from '../styles/Home.module.css';
 import { useAuth } from '../context/AuthContext';
-import { documentsAPI,documentFeedAPI } from '../api/auth';
+import { documentsAPI, documentFeedAPI, userAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
-import { Link } from "react-router-dom";
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
 import PdfViewer from '../components/PdfViewer';
@@ -23,25 +22,43 @@ export default function Feed() {
   // PDF-upload
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
-  const [courseName, setCourseName] = useState('');
-  const [semester, setSemester] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [courses, setCourses] = useState([]);
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
   const [allowDownload, setAllowDownload] = useState(false);
+
+  // Filter states
+  const [filterCourseId, setFilterCourseId] = useState('');
+  const [showSubscriptionsOnly, setShowSubscriptionsOnly] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchPosts();
+    fetchCourses();
   }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const data = await userAPI.getCourses();
+      // Filter courses by user's faculty
+      const userFacultyName = user?.faculty;
+      const filteredCourses = userFacultyName 
+        ? data.filter(course => course.faculty === userFacultyName)
+        : data;
+      setCourses(filteredCourses);
+    } catch (err) {
+      console.error('fetchCourses error', err);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
       const data = await documentFeedAPI.getAll();
-      const sortedPosts=data.sort((a,b)=>b.total_likes - a.total_likes);
       console.log("Api response",data); //prilikom učitavanja objave se sortiraju po broju lajkova
-      setPosts(sortedPosts);
-      console.log(posts);
+      setPosts(data);
     } catch (err) {
       console.error('fetchPosts error', err);
       
@@ -75,6 +92,73 @@ export default function Feed() {
     setPosts(sortedPosts);
   };
 
+  const handleSortByLikes = () => {
+    const sortedPosts = [...posts].sort((a, b) => b.total_likes - a.total_likes);
+    setPosts(sortedPosts);
+  };
+
+  const handleToggleSubscriptions = () => {
+    setShowSubscriptionsOnly(!showSubscriptionsOnly);
+  };
+
+  const handleCourseFilter = (e) => {
+    const courseId = e.target.value;
+    setFilterCourseId(courseId);
+    
+    // Check if user is subscribed to this course
+    if (courseId && user?.subscribed_courses) {
+      setIsSubscribed(user.subscribed_courses.includes(parseInt(courseId)));
+    } else {
+      setIsSubscribed(false);
+    }
+  };
+
+  const handleSubscriptionToggle = async (e) => {
+    const shouldSubscribe = e.target.checked;
+    
+    try {
+      if (shouldSubscribe) {
+        await userAPI.subscribeCourse(filterCourseId);
+        setIsSubscribed(true);
+        // Update user context to reflect new subscription
+        if (user) {
+          user.subscribed_courses = [...(user.subscribed_courses || []), parseInt(filterCourseId)];
+        }
+      } else {
+        await userAPI.unsubscribeCourse(filterCourseId);
+        setIsSubscribed(false);
+        // Update user context to remove subscription
+        if (user && user.subscribed_courses) {
+          user.subscribed_courses = user.subscribed_courses.filter(id => id !== parseInt(filterCourseId));
+        }
+      }
+    } catch (err) {
+      console.error('Subscription toggle error', err);
+      setMessage('Greška pri promjeni pretplate.');
+      // Revert checkbox state on error
+      setIsSubscribed(!shouldSubscribe);
+    }
+  };
+
+  // Get filtered posts based on active filters
+  const getFilteredPosts = () => {
+    let filtered = [...posts];
+
+    // Filter by subscriptions
+    if (showSubscriptionsOnly && user?.subscribed_courses) {
+      filtered = filtered.filter(post => 
+        user.subscribed_courses.includes(post.course?.id)
+      );
+    }
+
+    // Filter by selected course
+    if (filterCourseId) {
+      filtered = filtered.filter(post => post.course?.id === parseInt(filterCourseId));
+    }
+
+    return filtered;
+  };
+
   function onFileChange(e) {
     const f = e.target.files[0];
     if (!f) {
@@ -87,9 +171,9 @@ export default function Feed() {
       setFile(null);
       return;
     }
-    const maxSize = 5 * 1024 * 1024; // 5 MB limit
+    const maxSize = 50 * 1024 * 1024; // 50 MB limit
     if (f.size > maxSize) {
-      setMessage('Fajl je prevelik (max 5 MB).');
+      setMessage('Fajl je prevelik (max 50 MB).');
       e.target.value = '';
       setFile(null);
       return;
@@ -105,13 +189,8 @@ export default function Feed() {
       return alert('Unesi sadržaj objave ili priloži PDF.');
     }
 
-      if (courseName. trim() && ! semester. trim()) {
-      setMessage('Unesite semestar za kolegij.');
-      return;
-    }
-
-     if (semester.trim() && !courseName.trim()) {
-      setMessage('Unesite naziv kolegija.');
+    if (!selectedCourseId) {
+      setMessage('Odaberi kolegij.');
       return;
     }
 
@@ -119,9 +198,9 @@ export default function Feed() {
     formData.append('post', newPost);
     if (title.trim()) formData.append('title', title);
     if (file) formData.append('file', file, file.name);
-    if (courseName.trim()) formData.append('course_name', courseName);
-    if (semester.trim()) formData.append('semester', semester);
+    formData.append('course_id', selectedCourseId);
     formData.append('allow_download', allowDownload);
+    
     try {
       setUploading(true);
       setMessage('');
@@ -133,8 +212,7 @@ export default function Feed() {
       setPosts((prev) => [savedPost, ...prev]);
       setNewPost('');
       setTitle('');
-      setCourseName('');
-      setSemester('');
+      setSelectedCourseId('');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setShowModal(false);
@@ -191,71 +269,51 @@ export default function Feed() {
 
       <main className={styles.feedMain}>
         {posts.length > 0 &&
-        <div>
+        <div className={styles.filterBar}>
           <button onClick={handleSortByYear} className={styles.openModalBtn}>Sortiraj po datumu</button>
+          <button onClick={handleSortByLikes} className={styles.openModalBtn}>Sortiraj prema najbolja ocjena</button>
+          <button 
+            onClick={handleToggleSubscriptions} 
+            className={styles.openModalBtn}
+            style={{
+              background: showSubscriptionsOnly 
+                ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                : undefined
+            }}
+          >
+            {showSubscriptionsOnly ? '✓ ' : ''}Filtriraj samo pretplate
+          </button>
+          <select 
+            className={styles.filterSelect}
+            value={filterCourseId}
+            onChange={handleCourseFilter}
+          >
+            <option value="">Odaberi kolegij</option>
+            {courses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.name} (Sem {course.semester})
+              </option>
+            ))}
+          </select>
+          {filterCourseId && (
+            <label className={styles.subscribeLabel}>
+              <input
+                type="checkbox"
+                checked={isSubscribed}
+                onChange={handleSubscriptionToggle}
+              />
+              <span>Pretplati me na ovaj kolegij</span>
+            </label>
+          )}
         </div>} 
         <div className={styles.feedCard}>
           <button className={styles.openModalBtn} onClick={() => setShowModal(true)}>Nova objava</button>
-
-          {showModal && (
-            <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-              <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <h3>Napiši novu objavu</h3>
-                <form className={styles.newPostForm} onSubmit={handleAddPost}>
-                  <textarea
-                    value={newPost}
-                    onChange={(e) => setNewPost(e.target.value)}
-                    placeholder="Unesi sadržaj objave..."
-                  ></textarea>
-
-                  <hr />
-                  
-                  <textarea 
-                    value={title} 
-                    onChange={(e)=>setTitle(e.target.value)}
-                    placeholder='Unesi naslov dokumenta'
-                  ></textarea>
-
-                  <textarea value={courseName} onChange={(e)=>setCourseName(e.target.value)} placeholder='Unesi kolegij'></textarea>
-                  
-                  <textarea value={semester} onChange={(e)=>setSemester(e.target.value)} placeholder='Unesi semestar' min="1" max="10"></textarea>
-
-                  <h4>Priloži PDF</h4>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="application/pdf"
-                    onChange={onFileChange}
-                  />
-
-                  {file && (
-                    <div style={{padding: '0.75rem', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '8px', color: '#d1d5db', fontSize: '0.9rem'}}>
-                      <small>Priloženo: {file.name} ({Math.round(file.size / 1024)} KB)</small>
-                    </div>
-                  )}
-
-                  <label><input type="checkbox" checked={allowDownload} onChange={(e)=>setAllowDownload(e.target.checked)}/> Dozvoli preuzimanje</label>
-
-                  <button type="submit" disabled={uploading}>
-                    {uploading ? 'Spremanje...' : 'Objavi'}
-                  </button>
-                  
-                  <button type="button" className={styles.closeModalBtn} onClick={() => setShowModal(false)}>
-                    Zatvori
-                  </button>
-
-                  {message && <p className={styles.message}>{message}</p>}
-                </form>
-              </div>
-            </div>
-          )}
           
           <div className={styles.postsList}>
-            {posts.length === 0 ? (
+            {getFilteredPosts().length === 0 ? (
               <p className={styles.noPosts}>Još nema objava.</p>
             ) : (
-              posts.map((post) => (
+              getFilteredPosts().map((post) => (
                 <div key={post.id} className={styles.postItem}>
                   <p><ProfileHover user={post.user || 'Nepoznato'} /></p>
                   <span className={styles.postDate}>{post.uploaded_at || post.date}</span>
@@ -282,16 +340,16 @@ export default function Feed() {
                   )}
                   
                   <div className={styles.postActions}>
-                    {user.role==='student' ? (
-                      <button onClick={()=>handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
+                    {user.role === 'moderator' && post.status === 'pending' ? (
+                      <>
+                        <button className={styles.openModalBtn} onClick={() => handleApprove(post.id)}>Odobri</button>
+                        <button className={styles.openModalBtn} onClick={() => handleDecline(post.id)}>Odbij</button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleLike(post.id)} className={post.liked ? styles.likedBtn : styles.likeBtn}>
                         {post.liked ? (<FaHeart className={styles.iconFilled} />) : (<FaRegHeart className={styles.iconOutlined} />)}
                         <p>{post.total_likes}</p>
                       </button>
-                    ) : (
-                      <>
-                        <button className={styles.openModalBtn} onClick={()=>handleApprove(post.id)}>Odobri</button>
-                        <button className={styles.openModalBtn} onClick={()=>handleDecline(post.id)}>Odbij</button>
-                      </>
                     )}
                     
                     {/* Chat button for document discussion */}
@@ -322,6 +380,95 @@ export default function Feed() {
         </div>
         
       </main>
+
+      {/* Modal rendered at root level for proper centering */}
+      {showModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3>Napiši novu objavu</h3>
+            <form className={styles.newPostForm} onSubmit={handleAddPost}>
+              
+              {/* Title and Post content in a row */}
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Naslov</label>
+                  <input 
+                    type="text"
+                    value={title} 
+                    onChange={(e)=>setTitle(e.target.value)}
+                    placeholder='Unesi naslov dokumenta'
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Opis</label>
+                  <input
+                    type="text"
+                    value={newPost}
+                    onChange={(e) => setNewPost(e.target.value)}
+                    placeholder="Unesi sadržaj objave..."
+                  />
+                </div>
+              </div>
+
+              {/* Course dropdown - full width */}
+              <div className={styles.formGroup}>
+                <label>Kolegij</label>
+                <select
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  required
+                >
+                  <option value="">Odaberi kolegij...</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name} (Sem {course.semester})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* File upload */}
+              <div className={styles.formGroup}>
+                <label>Priloži PDF</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={onFileChange}
+                />
+                {file && (
+                  <div className={styles.fileInfo}>
+                    <small>📄 {file.name} ({Math.round(file.size / 1024)} KB)</small>
+                  </div>
+                )}
+              </div>
+
+              {/* Download permission */}
+              <div className={styles.formGroup}>
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={allowDownload} 
+                    onChange={(e)=>setAllowDownload(e.target.checked)}
+                  /> Dozvoli preuzimanje
+                </label>
+              </div>
+
+              {/* Action buttons */}
+              <div className={styles.formActions}>
+                <button type="submit" disabled={uploading} className={styles.submitBtn}>
+                  {uploading ? 'Spremanje...' : 'Objavi'}
+                </button>
+                <button type="button" className={styles.closeModalBtn} onClick={() => setShowModal(false)}>
+                  Zatvori
+                </button>
+              </div>
+
+              {message && <p className={styles.message}>{message}</p>}
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
  
