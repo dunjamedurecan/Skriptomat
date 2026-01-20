@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('posts', '0008_remove_document_author'),
+        ('posts', '0008_remove_document_author_document_allow_download'),
     ]
 
     operations = [
