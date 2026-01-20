@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 5px; margin-top: 15px; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>✅ Tvoja objava je odobrena!</h2>
+        </div>
+        <div class="content">
+            <p>Pozdrav {{ user_name }},</p>
+            <p>Tvoja objava je pregledana i odobrena od strane moderatora.</p>
+            
+            <h3>{{ post_title }}</h3>
+            <p><strong>Kolegij:</strong> {{ course_name }}</p>
+            <p><strong>Moderator:</strong> {{ moderator_name }}</p>
+            
+            <p>Objava je sada vidljiva svim studentima na platformi.</p>
+            
+            <a href="{{ post_url }}" class="button">Pogledaj objavu</a>
+        </div>
+        <div class="footer">
+            <p>Hvala što dijeliš znanje sa zajednicom! 🎓</p>
+        </div>
+    </div>
+</body>
+</html>
