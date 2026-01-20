@@ -36,10 +36,11 @@ class DocumentSerializer(serializers.ModelSerializer):
     semester = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     reviewed_by = ReviewedBySerializer(read_only=True)
     reviewed_at = serializers.DateTimeField(read_only=True)
+    allow_download =serializers.BooleanField()
 
     class Meta:
         model = Document
-        fields = ["id", "title", "post", "file", "uploaded_at", "user", "total_likes", "liked","status","course","course_id","course_name","semester","reviewed_by","reviewed_at"]
+        fields = ["id", "title", "post", "file", "uploaded_at", "user", "total_likes", "liked","status","course","course_id","course_name","semester","reviewed_by","reviewed_at","allow_download"]
         extra_kwargs = {
             'course':{'read_only': True}
         }

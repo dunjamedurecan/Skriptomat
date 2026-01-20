@@ -10,8 +10,9 @@ def validate_pdf(file):
             raise ValidationError("Only PDF files are allowed.")
     
     # Check file size (works for both new uploads and saved files)
-    if file.size > 5 * 1024 * 1024:  # 5 MB limit
-        raise ValidationError("File too large (max 5 MB).")
+    max_size = 50 * 1024 * 1024  # 50 MB limit
+    if file.size > max_size:
+        raise ValidationError("File too large (max 50 MB).")
 
 class Document(models.Model):
     class Status(models.TextChoices):
@@ -38,6 +39,7 @@ class Document(models.Model):
         blank=True,
         related_name='documents'
     )
+    allow_download=models.BooleanField(default=True)
     reviewed_by=models.ForeignKey(settings.AUTH_USER_MODEL,
         null=True,
         blank=True,

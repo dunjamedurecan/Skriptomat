@@ -7,7 +7,7 @@ import { documentsAPI, documentFeedAPI, userAPI } from '../api/auth';
 import ProfileHover from './ProfileHover';
 import BuyMeACoffee from '../components/BuyMeACoffee';
 import {FaHeart,FaRegHeart} from 'react-icons/fa';
-
+import PdfViewer from '../components/PdfViewer';
 //const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Feed() {
@@ -26,6 +26,7 @@ export default function Feed() {
   const [courses, setCourses] = useState([]);
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [allowDownload, setAllowDownload] = useState(false);
 
   // Filter states
   const [filterCourseId, setFilterCourseId] = useState('');
@@ -170,9 +171,9 @@ export default function Feed() {
       setFile(null);
       return;
     }
-    const maxSize = 5 * 1024 * 1024; // 5 MB limit
+    const maxSize = 50 * 1024 * 1024; // 50 MB limit
     if (f.size > maxSize) {
-      setMessage('Fajl je prevelik (max 5 MB).');
+      setMessage('Fajl je prevelik (max 50 MB).');
       e.target.value = '';
       setFile(null);
       return;
@@ -198,6 +199,7 @@ export default function Feed() {
     if (title.trim()) formData.append('title', title);
     if (file) formData.append('file', file, file.name);
     formData.append('course_id', selectedCourseId);
+    formData.append('allow_download', allowDownload);
     
     try {
       setUploading(true);
@@ -320,10 +322,14 @@ export default function Feed() {
                   <p>📚 {post.course?.name}</p>
                   <p>🧠 Sem {post.course?.semester}</p>
                   <p>🏛️ {post.course?.faculty_name}</p>
-                  
-                  {post.file && (
+                  {post.file && post.allow_download &&(
                     <p>
                       <a href={post.file} target="_blank" rel="noreferrer">Preuzmi PDF</a>
+                    </p>
+                  ) }
+                  {post.file && (
+                    <p>
+                      <PdfViewer pdfUrl={post.file} />
                     </p>
                   )}
 
@@ -360,6 +366,12 @@ export default function Feed() {
                       authorName={post.user?.username || post.user?.first_name || 'autora'}
                       postTitle={post.title}
                     />
+                    <button 
+                    className={styles.chatButton} 
+                    onClick={() => navigate(`/document/${post.id}`)}
+                  >
+                    💬 Čavrljanje
+                  </button>
                   </div>
                 </div>
               ))
@@ -429,6 +441,17 @@ export default function Feed() {
                     <small>📄 {file.name} ({Math.round(file.size / 1024)} KB)</small>
                   </div>
                 )}
+              </div>
+
+              {/* Download permission */}
+              <div className={styles.formGroup}>
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={allowDownload} 
+                    onChange={(e)=>setAllowDownload(e.target.checked)}
+                  /> Dozvoli preuzimanje
+                </label>
               </div>
 
               {/* Action buttons */}
