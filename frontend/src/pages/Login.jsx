@@ -87,7 +87,13 @@ export default function Login(){
             navigate('/feed');
         } catch (err) {
             console.error('Google login error:', err);
-            setError(err.response?.data?.error || 'Greška pri Google prijavi');
+            
+            // Check if user needs to register first
+            if (err.response?.status === 404 || err.response?.data?.action_required === 'register') {
+                setError('Korisnički račun ne postoji. Molimo najprije se registrirajte.');
+            } else {
+                setError(err.response?.data?.error || 'Greška pri Google prijavi');
+            }
         } finally {
             setLoading(false);
         }

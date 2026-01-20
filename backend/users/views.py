@@ -191,19 +191,13 @@ class GoogleLoginView(APIView):
         if not email or not email_verified:
             return Response({"error": "Google account email not available or not verified."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Find existing user or create
+        # Find existing user - DO NOT auto-create for login
         user = User.objects.filter(email__iexact=email).first()
         if not user:
-            local_part = email.split("@")[0]
-            base_username = local_part[:30]
-            username = base_username
-            suffix = 0
-            while User.objects.filter(username__iexact=username).exists():
-                suffix += 1
-                username = f"{base_username[:28]}{suffix}"
-            random_password = secrets.token_urlsafe(16)
-            user = User.objects.create_user(username=username, email=email, password=random_password)
-            user.save()
+            return Response({
+                "error": "Korisnički račun ne postoji. Molimo najprije se registrirajte.",
+                "action_required": "register"
+            }, status=status.HTTP_404_NOT_FOUND)
 
         if not user.is_active:
             return Response({"error": "Account is disabled."}, status=status.HTTP_403_FORBIDDEN)

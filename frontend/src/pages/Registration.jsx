@@ -315,28 +315,24 @@ export default function Registration(){
                         )}
                         <div className={regStyles.inputRow}>
                         <div className={regStyles.formGroup}>
-                            <label>Ime {usinggoogle ? '(od Google)' : '(opcionalno)'}</label>
+                            <label>Ime {usinggoogle ? '(od Google - moguće promijeniti)' : '(opcionalno)'}</label>
                             <input
                                 type='text'
                                 name='first_name'
                                 value={formData.first_name}
                                 onChange={handleChange}
                                 placeholder='Ime'
-                                disabled={usinggoogle}
-                                style={usinggoogle ? {opacity: 0.7, cursor: 'not-allowed'} : {}}
                             />
                         </div>
 
                         <div className={regStyles.formGroup}>
-                            <label>Prezime {usinggoogle ? '(od Google)' : '(opcionalno)'}</label>
+                            <label>Prezime {usinggoogle ? '(od Google - moguće promijeniti)' : '(opcionalno)'}</label>
                             <input
                                 type='text'
                                 name='last_name'
                                 value={formData.last_name}
                                 onChange={handleChange}
                                 placeholder='Prezime'
-                                disabled={usinggoogle}
-                                style={usinggoogle ? {opacity: 0.7, cursor: 'not-allowed'} : {}}
                             />
                         </div>
                     </div>
