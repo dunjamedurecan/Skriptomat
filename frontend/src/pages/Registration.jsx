@@ -129,9 +129,22 @@ export default function Registration(){
         setLoading(true);
         
         try {
-             console.log("Podaci za registraciju:", formData);
-            const response = await authAPI.register(formData);
+            console.log("Podaci za registraciju:", formData);
+            
+            // Use different endpoint for Google users
+            const response = usinggoogle 
+                ? await authAPI.googleRegisterComplete(formData)
+                : await authAPI.register(formData);
+            
             console.log('Registration successful:', response);
+            
+            // If Google registration, auto-login with returned tokens
+            if (usinggoogle && response.access_token) {
+                localStorage.setItem('access_token', response.access_token);
+                localStorage.setItem('refresh_token', response.refresh_token);
+                navigate('/feed');
+                return;
+            }
             
             // Show success message and redirect
             alert('Registracija uspješna! Molimo prijavite se.');
@@ -212,12 +225,14 @@ export default function Registration(){
                     // send id_token to your backend endpoint
                     const data = await authAPI.googleRegister({ id_token });
                     console.log('Google registration successful:', data);
-                    console.log(data.email);
+                    
+                    // Store Google data (email, names) and move to completion step
                     setFormData({
                         ...formData,
-                        email:data.email,
+                        email: data.email,
+                        first_name: data.first_name || '',
+                        last_name: data.last_name || ''
                     });
-                    console.log("Postavljeni podaci nakon Google registracije,:",formData);
                     setStep(2);
                     setUsingGoogle(true);
                 } catch (err) {
@@ -293,50 +308,35 @@ export default function Registration(){
                                 />
                             </div>
                         </div>
-                        {usinggoogle ? (<div className={regStyles.inputRow}>
-                            <div className={styles.formGroup}>
-                                <label>Lozinka za prijavu putem maila</label>
-                                <input
-                                    type='password'
-                                    name='password'
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    placeholder='••••••••'
-                                    required
-                                />
+                        {usinggoogle && (
+                            <div className={regStyles.googleInfo}>
+                                <p style={{color: '#10b981', fontSize: '0.9rem', marginBottom: '1rem'}}>✓ Registracija putem Google računa</p>
                             </div>
-                            <div className={styles.formGroup}>
-                                <label>Ponovi lozinku</label>
-                                <input
-                                    type='password'
-                                    name='password_confirm'
-                                    value={formData.password_confirm}
-                                    onChange={handleChange}
-                                    placeholder='••••••••'
-                                    required
-                                />
-                            </div>
-                        </div>):null}
+                        )}
                         <div className={regStyles.inputRow}>
                         <div className={regStyles.formGroup}>
-                            <label>Ime (opcionalno)</label>
+                            <label>Ime {usinggoogle ? '(od Google)' : '(opcionalno)'}</label>
                             <input
                                 type='text'
                                 name='first_name'
                                 value={formData.first_name}
                                 onChange={handleChange}
                                 placeholder='Ime'
+                                disabled={usinggoogle}
+                                style={usinggoogle ? {opacity: 0.7, cursor: 'not-allowed'} : {}}
                             />
                         </div>
 
                         <div className={regStyles.formGroup}>
-                            <label>Prezime (opcionalno)</label>
+                            <label>Prezime {usinggoogle ? '(od Google)' : '(opcionalno)'}</label>
                             <input
                                 type='text'
                                 name='last_name'
                                 value={formData.last_name}
                                 onChange={handleChange}
                                 placeholder='Prezime'
+                                disabled={usinggoogle}
+                                style={usinggoogle ? {opacity: 0.7, cursor: 'not-allowed'} : {}}
                             />
                         </div>
                     </div>

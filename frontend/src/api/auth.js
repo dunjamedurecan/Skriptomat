@@ -29,6 +29,11 @@ export const authAPI = {
   googleRegister: async ({id_token})=>{
     const response=await apiClient.post('/users/googleregister/',{id_token});
     return response.data;
+  },
+
+  googleRegisterComplete: async (userData) => {
+    const response = await apiClient.post('/users/googleregister/complete/', userData);
+    return response.data;
   }
 };
 
