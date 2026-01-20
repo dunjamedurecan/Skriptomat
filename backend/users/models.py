@@ -88,6 +88,11 @@ class User(AbstractUser):
         related_name='subscribers',
         help_text="Courses the user is subscribed to. Only courses from user's faculty."
     )
+
+    email_notifications = models.BooleanField(
+        default=True,
+        help_text="Receive email notifications for subscribed courses"
+    )
     
     # Login with email instead of username
     USERNAME_FIELD = 'email'

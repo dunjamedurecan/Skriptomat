@@ -99,7 +99,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined', 'role', 'faculty', 'paypal_email', 'subscribed_courses']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined', 'role', 'faculty', 'paypal_email', 'subscribed_courses', 'email_notifications']
         read_only_fields = ['id', 'date_joined']
 
 
@@ -110,7 +110,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'paypal_email']
+        fields = ['first_name', 'last_name', 'paypal_email', 'email_notifications']
     
     def validate_paypal_email(self, value):
         """Validate PayPal email format (optional field)"""
