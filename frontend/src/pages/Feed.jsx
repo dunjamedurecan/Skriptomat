@@ -23,10 +23,31 @@ export default function Feed() {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [selectedCourseId, setSelectedCourseId] = useState('');
-  const [courses, setCourses] = useState([]);
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
   const [allowDownload, setAllowDownload] = useState(false);
+
+  // Hardcoded courses list
+  const courses = [
+    // FER courses
+    { id: 1, name: "Vjekom", semester: 1, faculty: "FER" },
+    { id: 2, name: "DigLog", semester: 1, faculty: "FER" },
+    { id: 3, name: "Komre", semester: 4, faculty: "FER" },
+    { id: 4, name: "Matan2", semester: 2, faculty: "FER" },
+    { id: 5, name: "ARH", semester: 3, faculty: "FER" },
+    { id: 6, name: "DisMat", semester: 3, faculty: "FER" },
+    { id: 7, name: "BazePod", semester: 3, faculty: "FER" },
+    // Medicinski fakultet courses
+    { id: 8, name: "Anatomija", semester: 1, faculty: "Medicinski fakultet" },
+    { id: 9, name: "Fiziologija", semester: 1, faculty: "Medicinski fakultet" },
+    // FSB courses
+    { id: 10, name: "Mehatronika", semester: 2, faculty: "FSB" },
+    { id: 11, name: "Termodinamika", semester: 4, faculty: "FSB" },
+    // Ekonomski fakultet courses
+    { id: 12, name: "Uvod u statistiku", semester: 1, faculty: "Ekonomski fakultet" },
+    // Glazbena akademija courses
+    { id: 13, name: "Polifonija", semester: 1, faculty: "Glazbena akademija" },
+  ];
 
   // Filter states
   const [filterCourseId, setFilterCourseId] = useState('');
@@ -37,22 +58,7 @@ export default function Feed() {
 
   useEffect(() => {
     fetchPosts();
-    fetchCourses();
   }, []);
-
-  const fetchCourses = async () => {
-    try {
-      const data = await userAPI.getCourses();
-      // Filter courses by user's faculty
-      const userFacultyName = user?.faculty;
-      const filteredCourses = userFacultyName 
-        ? data.filter(course => course.faculty === userFacultyName)
-        : data;
-      setCourses(filteredCourses);
-    } catch (err) {
-      console.error('fetchCourses error', err);
-    }
-  };
 
   const fetchPosts = async () => {
     try {
