@@ -23,21 +23,41 @@ export default function Registration(){
     const navigate = useNavigate();
     const [step, setStep]=useState(1);
     const[usinggoogle,setUsingGoogle]=useState(false);
-    const [faculties, setFaculties] = useState([]);
     const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-    useEffect(() => {
-        fetchFaculties();
-    }, []);
-
-    const fetchFaculties = async () => {
-        try {
-            const data = await userAPI.getFaculties();
-            setFaculties(data);
-        } catch (err) {
-            console.error('fetchFaculties error', err);
-        }
-    };
+    // Hardcoded faculties list
+    const faculties = [
+        { id: 1, name: "FER" },
+        { id: 2, name: "PMF" },
+        { id: 3, name: "FFSE" },
+        { id: 4, name: "FSB" },
+        { id: 5, name: "FFZG" },
+        { id: 6, name: "Fakultet elektrotehnike i računarstva (FER)" },
+        { id: 7, name: "Prirodoslovno-matematički fakultet (PMF)" },
+        { id: 8, name: "Fakultet strojarstva i brodogradnje (FSB)" },
+        { id: 9, name: "Ekonomski fakultet" },
+        { id: 10, name: "Pravni fakultet" },
+        { id: 11, name: "Filozofski fakultet" },
+        { id: 12, name: "Medicinski fakultet" },
+        { id: 13, name: "Građevinski fakultet" },
+        { id: 14, name: "Arhitektonski fakultet" },
+        { id: 15, name: "Fakultet prometnih znanosti" },
+        { id: 16, name: "Fakultet kemijskog inženjerstva i tehnologije" },
+        { id: 17, name: "Tekstilno-tehnološki fakultet" },
+        { id: 18, name: "Metalurški fakultet" },
+        { id: 19, name: "Rudarsko-geološko-naftni fakultet" },
+        { id: 20, name: "Agronomski fakultet" },
+        { id: 21, name: "Šumarski fakultet" },
+        { id: 22, name: "Prehrambeno-biotehnološki fakultet" },
+        { id: 23, name: "Veterinarski fakultet" },
+        { id: 24, name: "Farmaceutsko-biokemijski fakultet" },
+        { id: 25, name: "Edukacijsko-rehabilitacijski fakultet" },
+        { id: 26, name: "Kineziološki fakultet" },
+        { id: 27, name: "Učiteljski fakultet" },
+        { id: 28, name: "Akademija likovnih umjetnosti" },
+        { id: 29, name: "Glazbena akademija" },
+        { id: 30, name: "Akademija dramske umjetnosti" },
+    ];
 
     // Email validation
     function validateEmail(email) {
