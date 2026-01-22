@@ -11,9 +11,13 @@ def send_email_in_background(subject, message, from_email, recipient_list, html_
     """
     Helper function to send email in a separate thread (non-blocking).
     """
+    import time
     print(f"🔄 Starting email send to {recipient_list}...")
     print(f"   Subject: {subject}")
     print(f"   From: {from_email}")
+    print(f"   Thread ID: {threading.current_thread().ident}")
+    start_time = time.time()
+    
     try:
         send_mail(
             subject=subject,
@@ -23,13 +27,15 @@ def send_email_in_background(subject, message, from_email, recipient_list, html_
             html_message=html_message,
             fail_silently=False,  # Show errors in logs temporarily
         )
-        print(f"✉️ Email successfully sent to {recipient_list}")
+        elapsed = time.time() - start_time
+        print(f"✉️ Email successfully sent to {recipient_list} in {elapsed:.2f}s")
     except Exception as e:
-        print(f"❌ Failed to send email to {recipient_list}")
+        elapsed = time.time() - start_time
+        print(f"❌ Failed to send email to {recipient_list} after {elapsed:.2f}s")
         print(f"   Error type: {type(e).__name__}")
         print(f"   Error message: {str(e)}")
         import traceback
-        print(f"   Traceback: {traceback.format_exc()}")
+        print(f"   Traceback:\n{traceback.format_exc()}")
 
 @receiver(post_save, sender=Document)
 def notify_course_subscribers(sender, instance, created, **kwargs):
