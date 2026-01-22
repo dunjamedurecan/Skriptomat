@@ -65,7 +65,7 @@ def notify_course_subscribers(sender, instance, created, **kwargs):
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[subscriber.email],
                 html_message=html_message,
-                fail_silently=False,
+                fail_silently=True,
             )
             print(f"✉️ Email sent to subscriber {subscriber.email}")
         except Exception as e:
@@ -117,7 +117,7 @@ def notify_author(instance):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[author.email],
             html_message=html_message,
-            fail_silently=False,
+            fail_silently=True,
         )
         print(f"✉️ Email sent to author {author.email}")
     except Exception as e:
