@@ -23,7 +23,7 @@ class Document(models.Model):
     
     post = models.CharField(max_length=200,blank=True)
     title = models.CharField(max_length=200, blank=True)
-    file = models.FileField(upload_to="pdfs/", validators=[validate_pdf], storage=SupabaseStorage())
+    file = models.FileField(upload_to="", validators=[validate_pdf], storage=SupabaseStorage())
     uploaded_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Koristite AUTH_USER_MODEL
