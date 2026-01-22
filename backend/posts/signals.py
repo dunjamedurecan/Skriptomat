@@ -12,10 +12,51 @@ def send_email_in_background(subject, message, from_email, recipient_list, html_
     Helper function to send email in a separate thread (non-blocking).
     """
     import time
-    print(f"🔄 Starting email send to {recipient_list}...")
-    print(f"   Subject: {subject}")
-    print(f"   From: {from_email}")
-    print(f"   Thread ID: {threading.current_thread().ident}")
+    import smtplib
+    import sys
+    
+    print(f"🔄 Starting email send to {recipient_list}...", flush=True)
+    print(f"   Subject: {subject}", flush=True)
+    print(f"   From: {from_email}", flush=True)
+    print(f"   Thread ID: {threading.current_thread().ident}", flush=True)
+    
+    # Debug: Print email settings
+    print(f"   EMAIL_HOST: {settings.EMAIL_HOST}", flush=True)
+    print(f"   EMAIL_PORT: {settings.EMAIL_PORT}", flush=True)
+    print(f"   EMAIL_USE_TLS: {settings.EMAIL_USE_TLS}", flush=True)
+    print(f"   EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}", flush=True)
+    print(f"   EMAIL_HOST_PASSWORD: {'*' * len(settings.EMAIL_HOST_PASSWORD) if settings.EMAIL_HOST_PASSWORD else 'NOT SET'}", flush=True)
+    print(f"   EMAIL_TIMEOUT: {getattr(settings, 'EMAIL_TIMEOUT', 'NOT SET')}", flush=True)
+    
+    start_time = time.time()
+    
+    # First test: Can we even connect to SMTP?
+    print(f"📡 Testing SMTP connection to {settings.EMAIL_HOST}:{settings.EMAIL_PORT}...", flush=True)
+    try:
+        smtp = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=30)
+        print(f"✅ SMTP connection established in {time.time() - start_time:.2f}s", flush=True)
+        
+        print(f"🔐 Starting TLS...", flush=True)
+        smtp.starttls()
+        print(f"✅ TLS started successfully", flush=True)
+        
+        print(f"🔑 Logging in with {settings.EMAIL_HOST_USER}...", flush=True)
+        smtp.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+        print(f"✅ Login successful!", flush=True)
+        
+        smtp.quit()
+        print(f"✅ SMTP test complete - connection works!", flush=True)
+    except Exception as smtp_error:
+        elapsed = time.time() - start_time
+        print(f"❌ SMTP TEST FAILED after {elapsed:.2f}s", flush=True)
+        print(f"   Error type: {type(smtp_error).__name__}", flush=True)
+        print(f"   Error: {str(smtp_error)}", flush=True)
+        import traceback
+        print(f"   Traceback:\n{traceback.format_exc()}", flush=True)
+        return  # Don't try to send if connection test fails
+    
+    # Now try actual send_mail
+    print(f"📧 Now sending actual email via Django...", flush=True)
     start_time = time.time()
     
     try:
@@ -25,14 +66,17 @@ def send_email_in_background(subject, message, from_email, recipient_list, html_
             from_email=from_email,
             recipient_list=recipient_list,
             html_message=html_message,
-            fail_silently=False,  # Show errors in logs temporarily
+            fail_silently=False,
         )
         elapsed = time.time() - start_time
-        print(f"✉️ Email successfully sent to {recipient_list} in {elapsed:.2f}s")
+        print(f"✉️ Email successfully sent to {recipient_list} in {elapsed:.2f}s", flush=True)
     except Exception as e:
         elapsed = time.time() - start_time
-        print(f"❌ Failed to send email to {recipient_list} after {elapsed:.2f}s")
-        print(f"   Error type: {type(e).__name__}")
+        print(f"❌ Failed to send email to {recipient_list} after {elapsed:.2f}s", flush=True)
+        print(f"   Error type: {type(e).__name__}", flush=True)
+        print(f"   Error message: {str(e)}", flush=True)
+        import traceback
+        print(f"   Traceback:\n{traceback.format_exc()}", flush=True)
         print(f"   Error message: {str(e)}")
         import traceback
         print(f"   Traceback:\n{traceback.format_exc()}")
