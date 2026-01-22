@@ -14,15 +14,10 @@ def serve_pdf(request, doc_id):
     except Document.DoesNotExist:
         raise Http404("PDF ne postoji")
 
-    
-
-    # ako nije dozvoljen download, šaljemo content-disposition inline
-    response = FileResponse(open(doc.file.path, 'rb'), content_type='application/pdf')
-    if not doc.allow_download:
-        response['Content-Disposition'] = 'inline'  # pregled u browseru
-    else:
-        response['Content-Disposition'] = f'attachment; filename="{doc.file.name}"'  # omogućuje download
-    return response
+    # With Supabase Storage, we redirect to the public URL
+    # The file is already publicly accessible via the storage policies
+    from django.shortcuts import redirect
+    return redirect(doc.file.url)
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset=Document.objects.all().order_by("-uploaded_at")
     serializer_class=DocumentSerializer

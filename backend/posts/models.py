@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from backend import settings
+from backend.supabase_storage import SupabaseStorage
 from users.models import Course
 
 def validate_pdf(file):
@@ -22,7 +23,7 @@ class Document(models.Model):
     
     post = models.CharField(max_length=200,blank=True)
     title = models.CharField(max_length=200, blank=True)
-    file = models.FileField(upload_to="pdfs/", validators=[validate_pdf])
+    file = models.FileField(upload_to="pdfs/", validators=[validate_pdf], storage=SupabaseStorage())
     uploaded_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Koristite AUTH_USER_MODEL
