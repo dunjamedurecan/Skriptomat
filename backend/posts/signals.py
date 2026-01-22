@@ -4,6 +4,25 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from .models import Document
+import threading
+
+
+def send_email_in_background(subject, message, from_email, recipient_list, html_message):
+    """
+    Helper function to send email in a separate thread (non-blocking).
+    """
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=from_email,
+            recipient_list=recipient_list,
+            html_message=html_message,
+            fail_silently=True,
+        )
+        print(f"✉️ Email sent to {recipient_list}")
+    except Exception as e:
+        print(f"❌ Failed to send email to {recipient_list}: {e}")
 
 @receiver(post_save, sender=Document)
 def notify_course_subscribers(sender, instance, created, **kwargs):
@@ -58,18 +77,20 @@ def notify_course_subscribers(sender, instance, created, **kwargs):
         
         html_message = render_to_string('emails/new_post_notification.html', context)
         
-        try:
-            send_mail(
-                subject=f'Nova objava: {instance.title}',
-                message=f'Nova objava u {course.name}: {instance.title}',
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[subscriber.email],
-                html_message=html_message,
-                fail_silently=True,
+        # Send email in background thread (non-blocking)
+        email_thread = threading.Thread(
+            target=send_email_in_background,
+            args=(
+                f'Nova objava: {instance.title}',
+                f'Nova objava u {course.name}: {instance.title}',
+                settings.DEFAULT_FROM_EMAIL,
+                [subscriber.email],
+                html_message,
             )
-            print(f"✉️ Email sent to subscriber {subscriber.email}")
-        except Exception as e:
-            print(f"❌ Failed to send email to {subscriber.email}: {e}")
+        )
+        email_thread.daemon = True
+        email_thread.start()
+        print(f"📧 Email sending started in background for {subscriber.email}")
 
 
 def notify_author(instance):
@@ -110,15 +131,17 @@ def notify_author(instance):
     
     html_message = render_to_string(template, context)
     
-    try:
-        send_mail(
-            subject=subject,
-            message=f'Tvoja objava "{instance.title}" - status: {instance.status}',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[author.email],
-            html_message=html_message,
-            fail_silently=True,
+    # Send email in background thread (non-blocking)
+    email_thread = threading.Thread(
+        target=send_email_in_background,
+        args=(
+            subject,
+            f'Tvoja objava "{instance.title}" - status: {instance.status}',
+            settings.DEFAULT_FROM_EMAIL,
+            [author.email],
+            html_message,
         )
-        print(f"✉️ Email sent to author {author.email}")
-    except Exception as e:
-        print(f"❌ Failed to send email to author {author.email}: {e}")
+    )
+    email_thread.daemon = True
+    email_thread.start()
+    print(f"📧 Email sending started in background for author {author.email}")

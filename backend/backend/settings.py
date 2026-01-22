@@ -32,8 +32,8 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # File Upload Settings
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 50 MB in bytes
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 50 MB in bytes
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB in bytes
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB in bytes
 
 
 # Application definition
