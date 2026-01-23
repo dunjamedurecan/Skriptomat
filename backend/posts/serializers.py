@@ -83,7 +83,7 @@ class DocumentSerializer(serializers.ModelSerializer):
                 course = Course.objects.get(id=course_id, faculty=user.faculty)
                 validated_data['course'] = course
             except Course.DoesNotExist:
-                raise serializers.ValidationError("Selected course does not exist or does not belong to your faculty.")
+                raise serializers.ValidationError("Kolegij ne pripada ovome faksu. Odaberite kolegij s Vašeg fakulteta.")
         
         # Otherwise, use course_name and semester (legacy support)
         elif course_name and semester:
