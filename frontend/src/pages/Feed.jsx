@@ -27,9 +27,8 @@ export default function Feed() {
   const [uploading, setUploading] = useState(false);
   const [allowDownload, setAllowDownload] = useState(false);
 
-  // Hardcoded courses list
-  const courses = [
-    // FER courses
+  // FER courses (hardcoded - always available)
+  const ferCourses = [
     { id: 1, name: "Vjekom", semester: 1, faculty: "FER" },
     { id: 2, name: "DigLog", semester: 1, faculty: "FER" },
     { id: 3, name: "Komre", semester: 4, faculty: "FER" },
@@ -37,17 +36,13 @@ export default function Feed() {
     { id: 5, name: "ARH", semester: 3, faculty: "FER" },
     { id: 6, name: "DisMat", semester: 3, faculty: "FER" },
     { id: 7, name: "BazePod", semester: 3, faculty: "FER" },
-    // Medicinski fakultet courses
-    { id: 8, name: "Anatomija", semester: 1, faculty: "Medicinski fakultet" },
-    { id: 9, name: "Fiziologija", semester: 1, faculty: "Medicinski fakultet" },
-    // FSB courses
-    { id: 10, name: "Mehatronika", semester: 2, faculty: "FSB" },
-    { id: 11, name: "Termodinamika", semester: 4, faculty: "FSB" },
-    // Ekonomski fakultet courses
-    { id: 12, name: "Uvod u statistiku", semester: 1, faculty: "Ekonomski fakultet" },
-    // Glazbena akademija courses
-    { id: 13, name: "Polifonija", semester: 1, faculty: "Glazbena akademija" },
   ];
+
+  // Other faculty courses (loaded from API)
+  const [apiCourses, setApiCourses] = useState([]);
+  
+  // Combined courses list (FER hardcoded + API courses)
+  const [courses, setCourses] = useState(ferCourses);
 
   // Filter states
   const [filterCourseId, setFilterCourseId] = useState('');
@@ -58,7 +53,27 @@ export default function Feed() {
 
   useEffect(() => {
     fetchPosts();
+    fetchCourses(); // Load courses from API on mount
   }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const data = await userAPI.getCourses();
+      console.log("Courses from API:", data);
+      
+      // Filter out FER courses from API (we have them hardcoded)
+      const nonFerCourses = data.filter(course => course.faculty_name !== 'FER');
+      setApiCourses(nonFerCourses);
+      
+      // Combine FER hardcoded + non-FER API courses
+      setCourses([...ferCourses, ...nonFerCourses]);
+    } catch (err) {
+      console.error('fetchCourses error', err);
+      setMessage('Greška pri dohvaćanju kolegija.');
+      // If API fails, at least show FER courses
+      setCourses(ferCourses);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
