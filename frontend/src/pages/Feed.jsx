@@ -27,9 +27,8 @@ export default function Feed() {
   const [uploading, setUploading] = useState(false);
   const [allowDownload, setAllowDownload] = useState(false);
 
-  // Hardcoded courses list
-  const courses = [
-    // FER courses
+  // FER courses (hardcoded - always available)
+  const ferCourses = [
     { id: 1, name: "Vjekom", semester: 1, faculty: "FER" },
     { id: 2, name: "DigLog", semester: 1, faculty: "FER" },
     { id: 3, name: "Komre", semester: 4, faculty: "FER" },
@@ -37,17 +36,13 @@ export default function Feed() {
     { id: 5, name: "ARH", semester: 3, faculty: "FER" },
     { id: 6, name: "DisMat", semester: 3, faculty: "FER" },
     { id: 7, name: "BazePod", semester: 3, faculty: "FER" },
-    // Medicinski fakultet courses
-    { id: 8, name: "Anatomija", semester: 1, faculty: "Medicinski fakultet" },
-    { id: 9, name: "Fiziologija", semester: 1, faculty: "Medicinski fakultet" },
-    // FSB courses
-    { id: 10, name: "Mehatronika", semester: 2, faculty: "FSB" },
-    { id: 11, name: "Termodinamika", semester: 4, faculty: "FSB" },
-    // Ekonomski fakultet courses
-    { id: 12, name: "Uvod u statistiku", semester: 1, faculty: "Ekonomski fakultet" },
-    // Glazbena akademija courses
-    { id: 13, name: "Polifonija", semester: 1, faculty: "Glazbena akademija" },
   ];
+
+  // Other faculty courses (loaded from API)
+  const [apiCourses, setApiCourses] = useState([]);
+  
+  // Combined courses list (FER hardcoded + API courses)
+  const [courses, setCourses] = useState(ferCourses);
 
   // Filter states
   const [filterCourseId, setFilterCourseId] = useState('');
@@ -58,7 +53,42 @@ export default function Feed() {
 
   useEffect(() => {
     fetchPosts();
+    fetchCourses(); // Load courses from API on mount
   }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const data = await userAPI.getCourses();
+      console.log("Courses from API:", data);
+      
+      // Filter courses by user's faculty
+      let filteredCourses = [];
+      
+      if (user?.faculty_name === 'FER') {
+        // FER users see hardcoded FER courses
+        filteredCourses = ferCourses;
+      } else if (user?.faculty_name) {
+        // Other faculty users see only their faculty courses from API
+        filteredCourses = data.filter(course => course.faculty_name === user.faculty_name);
+      } else {
+        // No faculty assigned - show all courses
+        const nonFerCourses = data.filter(course => course.faculty_name !== 'FER');
+        filteredCourses = [...ferCourses, ...nonFerCourses];
+      }
+      
+      setApiCourses(data);
+      setCourses(filteredCourses);
+    } catch (err) {
+      console.error('fetchCourses error', err);
+      setMessage('Greška pri dohvaćanju kolegija.');
+      // If API fails, show appropriate default
+      if (user?.faculty_name === 'FER') {
+        setCourses(ferCourses);
+      } else {
+        setCourses([]);
+      }
+    }
+  };
 
   const fetchPosts = async () => {
     try {
@@ -233,12 +263,25 @@ export default function Feed() {
     } catch (err) {
       console.error('handleAddPost error', err);
       
-      // Handle errors
+      // Handle errors with better messaging
       if (err.response?.status === 401) {
         setMessage('Sesija istekla. Molimo prijavite se ponovno.');
         logout();
-      } else if (err.response?.data?.detail) {
-        setMessage(err.response.data.detail);
+      } else if (err.response?.data) {
+        // Extract error message from response
+        const errorData = err.response.data;
+        if (Array.isArray(errorData) && errorData.length > 0) {
+          // Django validation errors come as array
+          setMessage(errorData[0]);
+        } else if (errorData.detail) {
+          setMessage(errorData.detail);
+        } else if (typeof errorData === 'string') {
+          setMessage(errorData);
+        } else {
+          setMessage('Greška pri dodavanju objave. Provjeri jesu li svi podaci ispravni.');
+        }
+      } else if (err.code === 'ECONNABORTED') {
+        setMessage('Upload traje duže nego očekivano. Provjeri stranicu za par minuta - objava se možda uspješno spremila.');
       } else {
         setMessage('Greška pri dodavanju objave.');
       }
