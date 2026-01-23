@@ -96,6 +96,7 @@ export const documentsAPI = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 120000, // 120 second timeout for large file uploads (up to 50MB)
     });
     return response.data;
   },
