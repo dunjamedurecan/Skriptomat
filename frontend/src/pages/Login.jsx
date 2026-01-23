@@ -16,6 +16,7 @@ export default function Login(){
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleReady, setGoogleReady] = useState(false);
     
     const navigate=useNavigate();
 
@@ -33,35 +34,49 @@ export default function Login(){
             return;
         }
         
-        // avoid loading twice
-        if (document.getElementById('google-client-script')) return;
+        // Check if script already exists
+        const existingScript = document.getElementById('google-client-script');
+        
+        if (existingScript) {
+            // Script exists, check if Google is ready
+            if (window.google?.accounts?.id) {
+                initializeGoogleButton();
+            } else {
+                // Wait for script to load
+                existingScript.addEventListener('load', initializeGoogleButton);
+            }
+            return;
+        }
 
+        // Create new script
         const script = document.createElement('script');
         script.src = 'https://accounts.google.com/gsi/client';
         script.async = true;
         script.defer = true;
         script.id = 'google-client-script';
-        script.onload = () => {
-            if (window.google && window.google.accounts && window.google.accounts.id) {
-                window.google.accounts.id.initialize({
-                    client_id: GOOGLE_CLIENT_ID,
-                    callback: handleCredentialResponse,
-                    ux_mode: 'popup' // popup is friendlier for SPA
-                });
-
-                // render button inside container
-                const container = document.getElementById('googleSignInDiv');
-                if (container) {
-                    window.google.accounts.id.renderButton(container, {
-                        theme: 'outline',
-                        size: 'large',
-                        text: 'signin_with'
-                    });
-                }
-            }
-        };
+        script.onload = initializeGoogleButton;
         document.body.appendChild(script);
-    }, [GOOGLE_CLIENT_ID])
+    }, [GOOGLE_CLIENT_ID]);
+    
+    const initializeGoogleButton = () => {
+        if (window.google?.accounts?.id) {
+            window.google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredentialResponse,
+                ux_mode: 'popup'
+            });
+
+            const container = document.getElementById('googleSignInDiv');
+            if (container) {
+                window.google.accounts.id.renderButton(container, {
+                    theme: 'outline',
+                    size: 'large',
+                    text: 'signin_with'
+                });
+                setGoogleReady(true);
+            }
+        }
+    };
     async function handleCredentialResponse(response) {
         setError('');
         setLoading(true);
@@ -87,7 +102,13 @@ export default function Login(){
             navigate('/feed');
         } catch (err) {
             console.error('Google login error:', err);
-            setError(err.response?.data?.error || 'Greška pri Google prijavi');
+            
+            // Check if user needs to register first
+            if (err.response?.status === 404 || err.response?.data?.action_required === 'register') {
+                setError('Korisnički račun ne postoji. Molimo najprije se registrirajte.');
+            } else {
+                setError(err.response?.data?.error || 'Greška pri Google prijavi');
+            }
         } finally {
             setLoading(false);
         }
@@ -116,8 +137,11 @@ export default function Login(){
 
         // Call backend
         setLoading(true);
+        console.log('🔐 Attempting login with:', { username: formData.username });
+        
         try {
             const response = await authAPI.login(formData);
+            console.log('✅ Login successful:', response);
 
             // Store tokens in localStorage
             login(
@@ -132,14 +156,23 @@ export default function Login(){
             navigate('/feed');
 
         } catch (err) {
-            console.error('Login error:', err);
+            console.error('❌ Login error:', err);
+            console.error('Error details:', {
+                message: err.message,
+                response: err.response?.data,
+                status: err.response?.status
+            });
 
-            if (err.response?.status === 401) {
+            if (err.code === 'ECONNABORTED') {
+                setError('Zahtjev je istekao. Provjeri da li backend radi.');
+            } else if (err.response?.status === 401) {
                 setError('Pogrešno korisničko ime ili lozinka');
             } else if (err.response?.status === 403) {
                 setError('Račun je onemogućen');
             } else if (err.response?.data?.error) {
                 setError(err.response.data.error);
+            } else if (err.message.includes('Network Error')) {
+                setError('Greška mreže - provjeri da li backend radi na localhost:8000');
             } else {
                 setError('Greška pri povezivanju sa serverom');
             }

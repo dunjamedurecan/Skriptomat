@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from .models import Role, Faculty,User
 
 User = get_user_model()  # Gets your custom User model
 
@@ -18,10 +19,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         write_only=True,
         style={'input_type': 'password'}
     )
-    
+    role=serializers.CharField()  
+    faculty=serializers.CharField()
     class Meta:
         model = User
-        fields = ['email', 'username', 'password', 'password_confirm', 'first_name', 'last_name']
+        fields = ['email', 'username', 'password', 'password_confirm', 'first_name', 'last_name','role','faculty']
         extra_kwargs = {
             'first_name': {'required': False},
             'last_name': {'required': False},
@@ -43,9 +45,32 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         
         return value
     
+    def validate_role(self, value):
+        """Ako je role string, traži odgovarajući ID u bazi."""
+        if isinstance(value, str):
+            role = Role.objects.filter(name=value).first()  # Traži po nazivu
+            if not role:
+                raise serializers.ValidationError(f"Role '{value}' does not exist.")
+            print("Pronađena:",role)
+            return role  # Vraćanje ID-a
+        return value
+
+    def validate_faculty(self, value):
+        """Ako je faculty string, traži odgovarajući ID u bazi."""
+        if isinstance(value, str):
+            faculty, created = Faculty.objects.get_or_create(name=value.strip())
+            return faculty  
+        return value
+   
+    
     def validate(self, data):
-        """Check if passwords match"""
-        if data['password'] != data['password_confirm']:
+        print("Podaci koji su poslati za validaciju:", data)
+        if "role" not in data:
+            raise serializers.ValidationError({"role": "Role field is required."})
+
+        if "faculty" not in data:
+            raise serializers.ValidationError({"faculty": "Faculty field is required."})
+        if data["password"] != data["password_confirm"]:
             raise serializers.ValidationError({"password": "Passwords do not match."})
         return data
     
@@ -63,12 +88,110 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+class GoogleRegistrationCompleteSerializer(serializers.ModelSerializer):
+    """
+    Serializer for completing Google registration with faculty, username, and role.
+    """
+    role = serializers.CharField()
+    faculty = serializers.CharField()
+    
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'first_name', 'last_name', 'role', 'faculty']
+        extra_kwargs = {
+            'email': {'required': True},
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+        }
+    
+    def validate_email(self, value):
+        """Check if email already exists"""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value.lower()
+    
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This username is not available.")
+        return value
+    
+    def validate_role(self, value):
+        """Convert role string to Role instance"""
+        if isinstance(value, str):
+            role = Role.objects.filter(name=value).first()
+            if not role:
+                raise serializers.ValidationError(f"Role '{value}' does not exist.")
+            return role
+        return value
+    
+    def validate_faculty(self, value):
+        """Convert faculty string to Faculty instance"""
+        if isinstance(value, str):
+            faculty, created = Faculty.objects.get_or_create(name=value.strip())
+            return faculty
+        return value
+    
+    def validate(self, data):
+        if "role" not in data:
+            raise serializers.ValidationError({"role": "Role field is required."})
+        if "faculty" not in data:
+            raise serializers.ValidationError({"faculty": "Faculty field is required."})
+        return data
+    
+    def create(self, validated_data):
+        """Create Google user WITHOUT password (they use Google OAuth to login)"""
+        user = User(**validated_data)
+        user.set_unusable_password()  # No password needed for Google users
+        user.save()
+        return user
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for returning user data (without password).
     Used for displaying user info in responses.
     """
+    role=serializers.StringRelatedField()
+    faculty=serializers.StringRelatedField()
+    subscribed_courses = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'date_joined', 'role', 'faculty', 'paypal_email', 'subscribed_courses', 'email_notifications']
         read_only_fields = ['id', 'date_joined']
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating user profile settings.
+    Allows users to update their PayPal email for receiving donations.
+    """
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'paypal_email', 'email_notifications']
+    
+    def validate_paypal_email(self, value):
+        """Validate PayPal email format (optional field)"""
+        if value and value.strip():
+            # Basic email validation is handled by EmailField
+            return value.strip().lower()
+        return None  # Allow clearing the field
+
+
+class PublicUserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for public user profile (viewed by other users).
+    Shows limited info and whether user accepts donations.
+    """
+    accepts_donations = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'date_joined', 'accepts_donations', 'paypal_email']
+        read_only_fields = fields
+    
+    def get_accepts_donations(self, obj):
+        """Returns True if user has PayPal email set"""
+        return bool(obj.paypal_email)

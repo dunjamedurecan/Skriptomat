@@ -86,3 +86,26 @@
     background: rgba(31, 41, 55, 0.8);
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
+.formGroup select {
+    padding: 0.95rem;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 10px;
+    background: rgba(31, 41, 55, 0.5);
+    color: #f3f4f6;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.formGroup select:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(31, 41, 55, 0.8);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.formGroup select option {
+    background: #1f2937;
+    color: #f3f4f6;
+}
