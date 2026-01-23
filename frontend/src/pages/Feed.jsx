@@ -61,17 +61,32 @@ export default function Feed() {
       const data = await userAPI.getCourses();
       console.log("Courses from API:", data);
       
-      // Filter out FER courses from API (we have them hardcoded)
-      const nonFerCourses = data.filter(course => course.faculty_name !== 'FER');
-      setApiCourses(nonFerCourses);
+      // Filter courses by user's faculty
+      let filteredCourses = [];
       
-      // Combine FER hardcoded + non-FER API courses
-      setCourses([...ferCourses, ...nonFerCourses]);
+      if (user?.faculty_name === 'FER') {
+        // FER users see hardcoded FER courses
+        filteredCourses = ferCourses;
+      } else if (user?.faculty_name) {
+        // Other faculty users see only their faculty courses from API
+        filteredCourses = data.filter(course => course.faculty_name === user.faculty_name);
+      } else {
+        // No faculty assigned - show all courses
+        const nonFerCourses = data.filter(course => course.faculty_name !== 'FER');
+        filteredCourses = [...ferCourses, ...nonFerCourses];
+      }
+      
+      setApiCourses(data);
+      setCourses(filteredCourses);
     } catch (err) {
       console.error('fetchCourses error', err);
       setMessage('Greška pri dohvaćanju kolegija.');
-      // If API fails, at least show FER courses
-      setCourses(ferCourses);
+      // If API fails, show appropriate default
+      if (user?.faculty_name === 'FER') {
+        setCourses(ferCourses);
+      } else {
+        setCourses([]);
+      }
     }
   };
 
@@ -248,12 +263,25 @@ export default function Feed() {
     } catch (err) {
       console.error('handleAddPost error', err);
       
-      // Handle errors
+      // Handle errors with better messaging
       if (err.response?.status === 401) {
         setMessage('Sesija istekla. Molimo prijavite se ponovno.');
         logout();
-      } else if (err.response?.data?.detail) {
-        setMessage(err.response.data.detail);
+      } else if (err.response?.data) {
+        // Extract error message from response
+        const errorData = err.response.data;
+        if (Array.isArray(errorData) && errorData.length > 0) {
+          // Django validation errors come as array
+          setMessage(errorData[0]);
+        } else if (errorData.detail) {
+          setMessage(errorData.detail);
+        } else if (typeof errorData === 'string') {
+          setMessage(errorData);
+        } else {
+          setMessage('Greška pri dodavanju objave. Provjeri jesu li svi podaci ispravni.');
+        }
+      } else if (err.code === 'ECONNABORTED') {
+        setMessage('Upload traje duže nego očekivano. Provjeri stranicu za par minuta - objava se možda uspješno spremila.');
       } else {
         setMessage('Greška pri dodavanju objave.');
       }
